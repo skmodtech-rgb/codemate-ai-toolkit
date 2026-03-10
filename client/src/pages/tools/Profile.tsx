@@ -27,7 +27,7 @@ export default function Profile() {
         setError('');
         try {
             const token = user?.token;
-            const { data } = await axios.put('http://localhost:5000/api/auth/profile', { name }, {
+            const { data } = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/profile`, { name }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             login({ ...user!, ...data } as any);
@@ -52,7 +52,7 @@ export default function Profile() {
         setPasswordSaving(true);
         try {
             const token = user?.token;
-            await axios.put('http://localhost:5000/api/auth/change-password', { currentPassword, newPassword }, {
+            await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/change-password`, { currentPassword, newPassword }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPasswordSaved(true);
