@@ -69,10 +69,13 @@ export default function CurrencyConverter() {
         setResult(null);
 
         try {
-            const res = await axios.post('https://cmpunktg6.app.n8n.cloud/webhook/convert-currency', { 
+            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/convert-currency`, { 
                 amount: Number(amount),
                 from: fromCurrency,
                 to: toCurrency
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             
             const converted = extractResult(res.data);

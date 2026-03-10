@@ -15,11 +15,15 @@ export default function WebScraper() {
         setResult(null);
 
         try {
-            // Integration with n8n Webhook
-            const webhookUrl = 'https://cmpunktg6.app.n8n.cloud/webhook/web-scraper';
+            // Integration with n8n Webhook via our backend proxy
+            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const webhookUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/web-scraper`;
             const response = await fetch(webhookUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ url })
             });
 

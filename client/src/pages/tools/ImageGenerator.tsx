@@ -12,8 +12,8 @@ export default function ImageGenerator() {
     const [lightbox, setLightbox] = useState(false);
 
     const ENDPOINTS: Record<string, string> = {
-        fast: 'https://cmpunktg6.app.n8n.cloud/webhook/generate-image',
-        pro: 'https://cmpunktg6.app.n8n.cloud/webhook/generate-image-pro',
+        fast: `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/generate-image`,
+        pro: `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/generate-image-pro`,
     };
 
     const handleGenerate = async () => {
@@ -23,7 +23,10 @@ export default function ImageGenerator() {
         setResultUrl(null);
 
         try {
-            const res = await axios.post(ENDPOINTS[model], { prompt });
+            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const res = await axios.post(ENDPOINTS[model], { prompt }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             // n8n webhook may return the image URL in different formats
             const url = res.data?.imageUrl || res.data?.image || res.data?.url || res.data?.output;
             if (url) {

@@ -42,7 +42,10 @@ export default function SpeechToText() {
                 ? { audio: file!.data, fileName: file!.name }
                 : { url };
 
-            const res = await axios.post('https://cmpunktg6.app.n8n.cloud/webhook/transcribe-audio', payload);
+            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/transcribe-audio`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             
             const text = res.data?.transcript || res.data?.text || res.data?.output || res.data;
             if (typeof text === 'string') {

@@ -11,8 +11,8 @@ export default function VideoGenerator() {
     const [error, setError] = useState<string | null>(null);
 
     const ENDPOINTS: Record<string, string> = {
-        fast: 'https://cmpunktg6.app.n8n.cloud/webhook/generate-video-fast',
-        pro: 'https://cmpunktg6.app.n8n.cloud/webhook/generate-video',
+        fast: `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/generate-video-fast`,
+        pro: `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/generate-video`,
     };
 
     const handleGenerate = async () => {
@@ -22,7 +22,10 @@ export default function VideoGenerator() {
         setResultUrl(null);
 
         try {
-            const res = await axios.post(ENDPOINTS[model], { prompt });
+            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const res = await axios.post(ENDPOINTS[model], { prompt }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             const url = res.data?.videoUrl || res.data?.video || res.data?.url || res.data?.output;
             if (url) {
                 setResultUrl(url);

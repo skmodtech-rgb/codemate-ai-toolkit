@@ -127,3 +127,24 @@ export const removeBackground = async (req: Request, res: Response) => {
         res.status(500).json({ success: false, message });
     }
 };
+
+// --- Generic n8n Proxy to avoid CORS ---
+export const n8nProxy = async (req: Request, res: Response) => {
+    try {
+        const { action } = req.params;
+        const endpoint = `https://cmpunktg6.app.n8n.cloud/webhook/${action}`;
+        
+        const response = await axios.post(endpoint, req.body, {
+            timeout: 120000,
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        res.json(response.data);
+    } catch (error: any) {
+        let message = error.message || 'Action failed';
+        if (error.response?.data) {
+            message = error.response.data.message || error.response.data || message;
+        }
+        res.status(500).json({ success: false, message });
+    }
+};

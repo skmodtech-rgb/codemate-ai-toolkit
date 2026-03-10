@@ -35,10 +35,14 @@ export default function YoutubeTranscriber() {
         }
 
         try {
-            const res = await axios.post('https://cmpunktg6.app.n8n.cloud/webhook/transcribe-video', { 
+            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/transcribe-video`, { 
                 url: url.trim(),
                 videoId,
-            }, { timeout: 120000 });
+            }, {
+                headers: { Authorization: `Bearer ${token}` },
+                timeout: 120000 
+            });
             
             // Handle various response formats
             const data = res.data;

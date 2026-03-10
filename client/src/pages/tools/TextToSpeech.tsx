@@ -16,8 +16,11 @@ export default function TextToSpeech() {
         setResultUrl(null);
 
         try {
-            const res = await axios.post('https://cmpunktg6.app.n8n.cloud/webhook/text-to-speech', { 
+            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/text-to-speech`, { 
                 text 
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             
             const url = res.data?.audioUrl || res.data?.audio || res.data?.url || res.data?.output;
