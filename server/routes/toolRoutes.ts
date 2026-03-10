@@ -1,0 +1,15 @@
+import express from 'express';
+import { generateImage, generateVideo, chatRequest, utilityGeneric } from '../controllers/toolController';
+import { protect } from '../middleware/authMiddleware';
+
+const router = express.Router();
+
+// Require auth for all tool routes
+router.use(protect);
+
+router.post('/image', generateImage);
+router.post('/video', generateVideo);
+router.post('/chat', chatRequest);
+router.post('/utility/:action', utilityGeneric);
+
+export default router;

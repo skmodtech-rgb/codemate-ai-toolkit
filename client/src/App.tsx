@@ -1,0 +1,116 @@
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useStore } from './store/useStore';
+
+// Layouts
+import MainLayout from './layout/MainLayout';
+
+// Pages
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+
+// Tools
+import ImageGenerator from './pages/tools/ImageGenerator';
+import VideoGenerator from './pages/tools/VideoGenerator';
+import Chatbot from './pages/tools/Chatbot';
+import BgRemover from './pages/tools/BgRemover';
+import TextToSpeech from './pages/tools/TextToSpeech';
+import SpeechToText from './pages/tools/SpeechToText';
+import YoutubeTranscriber from './pages/tools/YoutubeTranscriber';
+import CurrencyConverter from './pages/tools/CurrencyConverter';
+import JsonFormatter from './pages/tools/JsonFormatter';
+import JsonToCsv from './pages/tools/JsonToCsv';
+import CsvToJson from './pages/tools/CsvToJson';
+import HashGenerator from './pages/tools/HashGenerator';
+import Base64Encoder from './pages/tools/Base64Encoder';
+import PasswordGenerator from './pages/tools/PasswordGenerator';
+import QrGenerator from './pages/tools/QrGenerator';
+import WordCounter from './pages/tools/WordCounter';
+import LoremIpsum from './pages/tools/LoremIpsum';
+// Document Workshop Tools
+import PdfMerger from './pages/tools/PdfMerger';
+import PdfSplitter from './pages/tools/PdfSplitter';
+import PdfCompressor from './pages/tools/PdfCompressor';
+import ImageToPdf from './pages/tools/ImageToPdf';
+import PdfToImages from './pages/tools/PdfToImages';
+import PdfToWord from './pages/tools/PdfToWord';
+import WordToPdf from './pages/tools/WordToPdf';
+import GenericTool from './pages/tools/GenericTool';
+
+// Protected Route Wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    const { user } = useStore();
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+    return <>{children}</>;
+};
+
+function App() {
+    const { isDarkMode } = useStore();
+
+    useEffect(() => {
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        }
+    }, [isDarkMode]);
+
+    return (
+        <Router>
+            <Routes>
+                {/* Public Marketing Route */}
+                <Route path="/" element={<Home />} />
+                
+                {/* Auth Routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+
+                {/* Secure App / Dashboard Routes */}
+                <Route path="/app" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="image-generator" element={<ImageGenerator />} />
+                    <Route path="video-generator" element={<VideoGenerator />} />
+                    <Route path="chatbot" element={<Chatbot />} />
+                    <Route path="bg-remover" element={<BgRemover />} />
+                    <Route path="text-to-speech" element={<TextToSpeech />} />
+                    <Route path="speech-to-text" element={<SpeechToText />} />
+                    <Route path="youtube-transcriber" element={<YoutubeTranscriber />} />
+                    <Route path="currency-converter" element={<CurrencyConverter />} />
+
+                    {/* Document Workshop */}
+                    <Route path="pdf-to-word" element={<PdfToWord />} />
+                    <Route path="word-to-pdf" element={<WordToPdf />} />
+                    <Route path="pdf-merger" element={<PdfMerger />} />
+                    <Route path="pdf-splitter" element={<PdfSplitter />} />
+                    <Route path="pdf-compressor" element={<PdfCompressor />} />
+                    <Route path="image-to-pdf" element={<ImageToPdf />} />
+                    <Route path="pdf-to-images" element={<PdfToImages />} />
+
+                    {/* Data Tools */}
+                    <Route path="json-formatter" element={<JsonFormatter />} />
+                    <Route path="json-to-csv" element={<JsonToCsv />} />
+                    <Route path="csv-to-json" element={<CsvToJson />} />
+                    <Route path="qr-generator" element={<QrGenerator />} />
+
+                    {/* Developer Tools */}
+                    <Route path="base64" element={<Base64Encoder />} />
+                    <Route path="hash-generator" element={<HashGenerator />} />
+
+                    {/* Utility Tools */}
+                    <Route path="password-generator" element={<PasswordGenerator />} />
+                    <Route path="word-counter" element={<WordCounter />} />
+                    <Route path="lorem-ipsum" element={<LoremIpsum />} />
+
+                    <Route path="*" element={<GenericTool />} />
+                </Route>
+            </Routes>
+        </Router>
+    );
+}
+
+export default App;
