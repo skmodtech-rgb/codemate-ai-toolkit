@@ -43,7 +43,6 @@ import CsvToJson from './pages/tools/CsvToJson';
 import HashGenerator from './pages/tools/HashGenerator';
 import Base64Encoder from './pages/tools/Base64Encoder';
 import QrGenerator from './pages/tools/QrGenerator';
-import LoremIpsum from './pages/tools/LoremIpsum';
 // Document Workshop Tools
 import PdfMerger from './pages/tools/PdfMerger';
 import PdfSplitter from './pages/tools/PdfSplitter';
@@ -52,6 +51,18 @@ import ImageToPdf from './pages/tools/ImageToPdf';
 import PdfToImages from './pages/tools/PdfToImages';
 import PdfToWord from './pages/tools/PdfToWord';
 import WordToPdf from './pages/tools/WordToPdf';
+import CsvVisualizer from './pages/tools/CsvVisualizer';
+import QrScanner from './pages/tools/QrScanner';
+import ColorExtractor from './pages/tools/ColorExtractor';
+import DataComparator from './pages/tools/DataComparator';
+import WebScraper from './pages/tools/WebScraper';
+import JwtDebugger from './pages/tools/JwtDebugger';
+import RegexTester from './pages/tools/RegexTester';
+import HtmlFormatter from './pages/tools/HtmlFormatter';
+import CssMinifier from './pages/tools/CssMinifier';
+import JsMinifier from './pages/tools/JsMinifier';
+import ApiTester from './pages/tools/ApiTester';
+import SqlFormatter from './pages/tools/SqlFormatter';
 import GenericTool from './pages/tools/GenericTool';
 
 // Protected Route Wrapper
@@ -122,6 +133,11 @@ function App() {
                     <Route path="json-to-csv" element={<JsonToCsv />} />
                     <Route path="csv-to-json" element={<CsvToJson />} />
                     <Route path="qr-generator" element={<QrGenerator />} />
+                    <Route path="csv-visualizer" element={<CsvVisualizer />} />
+                    <Route path="qr-scanner" element={<QrScanner />} />
+                    <Route path="color-extractor" element={<ColorExtractor />} />
+                    <Route path="data-comparator" element={<DataComparator />} />
+                    <Route path="web-scraper" element={<WebScraper />} />
 
                     {/* Utility Hub */}
                     <Route path="password-generator" element={<PasswordGenerator />} />
@@ -136,8 +152,13 @@ function App() {
                     {/* Developer Tools */}
                     <Route path="base64" element={<Base64Encoder />} />
                     <Route path="hash-generator" element={<HashGenerator />} />
-
-                    <Route path="lorem-ipsum" element={<LoremIpsum />} />
+                    <Route path="jwt-debugger" element={<JwtDebugger />} />
+                    <Route path="regex-tester" element={<RegexTester />} />
+                    <Route path="html-formatter" element={<HtmlFormatter />} />
+                    <Route path="css-minifier" element={<CssMinifier />} />
+                    <Route path="js-minifier" element={<JsMinifier />} />
+                    <Route path="api-tester" element={<ApiTester />} />
+                    <Route path="sql-formatter" element={<SqlFormatter />} />
 
                     <Route path="*" element={<GenericTool />} />
                 </Route>
