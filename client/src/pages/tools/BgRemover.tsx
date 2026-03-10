@@ -31,11 +31,14 @@ export default function BgRemover() {
         setError(null);
         
         try {
-            // First try: expect binary/blob response (most BG removal APIs return raw image)
-            const res = await axios.post('https://cmpunktg6.app.n8n.cloud/webhook/remove-bg', {
+            // Proxy request through our own backend to avoid CORS issues from N8N cloud
+            const res = await axios.post('http://localhost:5000/api/tools/remove-bg', {
                 image: file.data,
                 fileName: file.name
             }, {
+                headers: {
+                    Authorization: `Bearer ${JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token}`
+                },
                 responseType: 'arraybuffer',
                 timeout: 60000,
             });

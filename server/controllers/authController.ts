@@ -26,6 +26,10 @@ export const authUser = async (req: Request, res: Response) => {
         const user: any = await User.findOne({ email });
 
         if (user && (await user.matchPassword(password))) {
+            if (!user.isEmailVerified && process.env.MONGODB_URI !== 'YOUR_MONGO_DB_URL') {
+                res.status(401);
+                throw new Error('Please verify your email address to login. Check your inbox.');
+            }
             res.json({
                 _id: user._id,
                 name: user.name,

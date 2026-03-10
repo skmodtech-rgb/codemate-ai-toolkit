@@ -308,7 +308,7 @@ export default function MainLayout() {
             {/* Main */}
             <main className="flex-1 flex flex-col h-full relative overflow-hidden min-w-0">
                 {/* Navbar */}
-                <header className="h-14 shrink-0 px-3 sm:px-5 glass-navbar flex items-center justify-between z-10 sticky top-0 gap-2">
+                <header className="h-14 shrink-0 px-3 sm:px-5 glass-navbar flex items-center justify-between z-[100] sticky top-0 gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                         <button onClick={() => setMobileMenuOpen(true)} className="p-2 rounded-xl hover:bg-[var(--hover-bg)] transition-colors lg:hidden shrink-0">
                             <Menu className="w-5 h-5 text-foreground" />
@@ -331,9 +331,9 @@ export default function MainLayout() {
                                 placeholder="Search tools..."
                                 className="glass-input pl-9 pr-4 py-2 text-sm rounded-xl w-full"
                             />
-                            {/* Search Results Dropdown */}
+                            {/* Search Results Dropdown — fixed positioning to escape stacking context */}
                             {searchFocused && searchResults.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-2 dropdown-solid rounded-2xl shadow-dropdown overflow-hidden z-50 max-h-80 overflow-y-auto custom-scrollbar">
+                                <div className="fixed top-14 mt-1 w-72 sm:w-80 dropdown-solid rounded-2xl shadow-dropdown overflow-hidden z-[200] max-h-80 overflow-y-auto custom-scrollbar">
                                     <div className="p-1.5">
                                         {searchResults.map(tool => (
                                             <button key={tool.path} onClick={() => handleSearchSelect(tool.path)}
@@ -350,7 +350,7 @@ export default function MainLayout() {
                                 </div>
                             )}
                             {searchFocused && searchQuery.trim() && searchResults.length === 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-2 dropdown-solid rounded-2xl shadow-dropdown z-50 p-4 text-center text-sm text-muted-foreground">
+                                <div className="fixed top-14 mt-1 w-72 sm:w-80 dropdown-solid rounded-2xl shadow-dropdown z-[200] p-4 text-center text-sm text-muted-foreground">
                                     No tools found for "{searchQuery}"
                                 </div>
                             )}
@@ -382,7 +382,7 @@ export default function MainLayout() {
                                 <ChevronDown className={`w-3 h-3 text-muted-foreground hidden sm:block transition-transform duration-150 ${profileOpen ? 'rotate-180' : ''}`} />
                             </button>
                             {profileOpen && (
-                                <div className="absolute right-0 mt-2 w-60 dropdown-solid rounded-2xl shadow-dropdown overflow-hidden z-50">
+                                <div className="fixed top-14 mt-1 right-3 sm:right-5 w-60 dropdown-solid rounded-2xl shadow-dropdown overflow-hidden z-[200]">
                                     <div className="p-3 border-b border-border/30">
                                         <div className="flex items-center gap-3">
                                             <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-gradient-to-tr from-brand-500 to-brand-400 text-white font-bold text-sm shadow-md">
@@ -421,8 +421,8 @@ export default function MainLayout() {
                 </header>
 
                 {/* Scrollable content */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar w-full p-3 sm:p-5 lg:p-8 relative">
-                    <div className="max-w-7xl mx-auto relative z-10">
+                <div className="flex-1 overflow-y-auto custom-scrollbar w-full p-3 sm:p-5 lg:p-8">
+                    <div className="max-w-7xl mx-auto">
                         <Outlet />
                     </div>
                 </div>

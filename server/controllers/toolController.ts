@@ -87,3 +87,43 @@ export const utilityGeneric = async (req: Request, res: Response) => {
         data: {}
     });
 };
+
+// --- Background Remover (Proxy to avoid CORS) ---
+export const removeBackground = async (req: Request, res: Response) => {
+    try {
+        const endpoint = process.env.N8N_BG_REMOVER_ENDPOINT;
+        
+        if (!endpoint) {
+            // Mock empty response if endpoint is missing for demo purposes
+            res.status(400);
+            throw new Error('N8N_BG_REMOVER_ENDPOINT is not configured.');
+        }
+
+        const response = await axios.post(endpoint as string, req.body, {
+            responseType: 'arraybuffer', // Important to handle both binary and JSON
+            timeout: 60000,
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json, image/*'
+            }
+        });
+
+        // Pass headers properly back to the client
+        const contentType = response.headers['content-type'] || 'application/json';
+        res.set('Content-Type', contentType);
+        res.send(response.data);
+    } catch (error: any) {
+        // If the arraybuffer failed, we need to extract the JSON error message from it
+        let message = error.message || 'Background removal failed';
+        if (error.response?.data) {
+            try {
+                const text = new TextDecoder().decode(error.response.data);
+                const json = JSON.parse(text);
+                message = json.message || message;
+            } catch (e) {
+                // ignore
+            }
+        }
+        res.status(500).json({ success: false, message });
+    }
+};
