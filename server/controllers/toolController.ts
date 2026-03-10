@@ -130,8 +130,8 @@ export const removeBackground = async (req: Request, res: Response) => {
 
 // --- Generic n8n Proxy to avoid CORS ---
 export const n8nProxy = async (req: Request, res: Response) => {
+    const { action } = req.params;
     try {
-        const { action } = req.params;
         const endpoint = `https://cmpunktg6.app.n8n.cloud/webhook/${action}`;
         
         const response = await axios.post(endpoint, req.body, {
