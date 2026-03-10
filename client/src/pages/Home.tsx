@@ -1,140 +1,270 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Activity, Cpu, FileImage, FileText, Send } from 'lucide-react';
+import { ArrowRight, Sparkles, Zap, Shield, Globe, FileText, Code, Image as ImageIcon, Video, MessageSquare, Cpu, ChevronRight } from 'lucide-react';
 import { TbApiApp } from "react-icons/tb";
+
+const fadeIn = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
+const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
+
+const features = [
+    { icon: ImageIcon, title: 'AI Image Studio', desc: 'Generate stunning visuals from text prompts with state-of-the-art diffusion models.', color: '#4da8a8' },
+    { icon: Video, title: 'Video Generation', desc: 'Create professional video content powered by advanced AI pipelines.', color: '#7ec4c4' },
+    { icon: MessageSquare, title: 'Smart Chatbots', desc: 'Chat with the best LLMs for coding, research, and creative brainstorming.', color: '#2d8a8a' },
+    { icon: FileText, title: 'Document Workshop', desc: 'Merge, split, compress PDFs. Convert formats instantly without watermarks.', color: '#4da8a8' },
+    { icon: Code, title: 'Developer Toolkit', desc: 'Base64, JWT, Regex, API testing, minifiers — everything a developer needs.', color: '#7ec4c4' },
+    { icon: Cpu, title: 'Data Intelligence', desc: 'CSV visualization, JSON tools, QR codes, color extraction and more.', color: '#2d8a8a' },
+];
+
+const stats = [
+    { value: '50+', label: 'AI Tools' },
+    { value: '10K+', label: 'Users' },
+    { value: '99.9%', label: 'Uptime' },
+    { value: '0', label: 'Cost' },
+];
 
 export default function Home() {
     return (
-        <div className="min-h-screen bg-[#020817] text-slate-100 overflow-hidden selection:bg-brand-500/30">
-            {/* Minimal Background Gradients */}
-            <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-brand-600/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
-            <div className="fixed bottom-[-10%] right-[-10%] w-[60%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
+        <div className="min-h-screen overflow-hidden relative">
+            {/* Background Orbs */}
+            <div className="bg-orb w-[600px] h-[600px] bg-brand-300/40 top-[-200px] left-[-100px] animate-blob" />
+            <div className="bg-orb w-[500px] h-[500px] bg-brand-200/30 bottom-[-100px] right-[-100px] animate-blob animation-delay-2000" />
+            <div className="bg-orb w-[400px] h-[400px] bg-brand-400/20 top-[40%] left-[50%] animate-blob animation-delay-4000" />
 
-            {/* Navbar */}
-            <nav className="fixed w-full z-50 py-4 px-6 md:px-12 backdrop-blur-md bg-[#020817]/60 border-b border-white/5">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-lg bg-gradient-to-tr from-brand-600 to-indigo-500 shadow-lg">
-                            <TbApiApp className="w-6 h-6 text-white" />
+            {/* ====== NAVBAR ====== */}
+            <nav className="fixed w-full z-50 top-0">
+                <div className="mx-4 sm:mx-8 mt-4">
+                    <div className="glass-card rounded-2xl px-4 sm:px-6 py-3">
+                        <div className="max-w-7xl mx-auto flex justify-between items-center">
+                            <Link to="/" className="flex items-center gap-2.5 group">
+                                <div className="p-1.5 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 shadow-lg shadow-brand-500/20 group-hover:shadow-brand-500/40 transition-shadow">
+                                    <TbApiApp className="w-5 h-5 text-white" />
+                                </div>
+                                <span className="font-bold text-lg tracking-tight text-foreground">ToolMate <span className="text-gradient">AI</span></span>
+                            </Link>
+                            
+                            <div className="hidden md:flex items-center gap-8">
+                                <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</a>
+                                <a href="#stats" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Stats</a>
+                                <a href="#cta" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Get Started</a>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <Link to="/login" className="text-sm font-semibold text-foreground hover:text-brand-500 transition-colors hidden sm:block">
+                                    Sign in
+                                </Link>
+                                <Link to="/register" className="btn-primary text-sm px-5 py-2.5 rounded-xl">
+                                    Get Started Free
+                                </Link>
+                            </div>
                         </div>
-                        <span className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">ToolMate AI</span>
-                    </div>
-                    
-                    <div className="hidden md:flex gap-8 text-sm font-medium text-slate-300">
-                        <a href="#features" className="hover:text-white transition-colors">Features</a>
-                        <a href="#students" className="hover:text-white transition-colors">For Students</a>
-                        <a href="#developers" className="hover:text-white transition-colors">For Developers</a>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <Link to="/login" className="text-sm font-medium hover:text-white transition-colors">Sign in</Link>
-                        <Link to="/register" className="px-4 py-2 text-sm font-semibold rounded-full bg-white text-black hover:bg-slate-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]">
-                            Get Started
-                        </Link>
                     </div>
                 </div>
             </nav>
 
-            {/* Hero Section */}
-            <section className="relative pt-40 pb-20 px-6 md:px-12 flex flex-col items-center text-center">
+            {/* ====== HERO SECTION ====== */}
+            <section className="relative pt-32 sm:pt-40 pb-20 px-4 sm:px-8 flex flex-col items-center text-center">
                 <motion.div 
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="max-w-4xl flex flex-col items-center"
+                    initial="hidden" animate="visible" variants={stagger}
+                    className="max-w-4xl flex flex-col items-center relative z-10"
                 >
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 mb-8 text-sm font-medium">
+                    <motion.div variants={fadeIn} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card mb-8 text-sm font-medium text-brand-600 dark:text-brand-300">
                         <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500" />
                         </span>
-                        Introducing ToolMate AI 1.0
-                    </div>
+                        Introducing ToolMate AI — 50+ Tools in One Platform
+                    </motion.div>
 
-                    <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
-                        Power up your daily workflow with <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-indigo-400">intelligent tools.</span>
-                    </h1>
+                    <motion.h1 variants={fadeIn} className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] text-foreground">
+                        Power up your<br />
+                        workflow with{' '}
+                        <span className="text-gradient">intelligent tools.</span>
+                    </motion.h1>
                     
-                    <p className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl font-light">
-                        The ultimate all-in-one AI platform tailored for students, teachers, and developers to generate media, process documents, and chat with cutting-edge AI.
-                    </p>
+                    <motion.p variants={fadeIn} className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl font-light leading-relaxed">
+                        The ultimate all-in-one AI platform tailored for students, teachers, and developers to generate media, process documents, and build with AI.
+                    </motion.p>
                     
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <Link to="/register" className="h-12 px-8 inline-flex justify-center items-center rounded-full bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-semibold shadow-xl shadow-brand-500/20 hover:scale-105 transition-all">
+                    <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4">
+                        <Link to="/register" className="btn-primary h-14 px-8 text-base rounded-2xl gap-2 group">
                             Start Building Free
-                            <Send className="ml-2 w-4 h-4" />
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
-                        <a href="#features" className="h-12 px-8 inline-flex justify-center items-center rounded-full bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition-all">
+                        <a href="#features" className="btn-secondary h-14 px-8 text-base rounded-2xl gap-2">
+                            <Sparkles className="w-4 h-4" />
                             Explore Tools
                         </a>
-                    </div>
+                    </motion.div>
                 </motion.div>
 
-                {/* Abstract UI Preview */}
+                {/* Abstract Dashboard Preview */}
                 <motion.div 
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, delay: 0.2 }}
-                    className="mt-24 relative w-full max-w-5xl aspect-video rounded-xl bg-black/40 border border-white/10 shadow-2xl backdrop-blur-sm overflow-hidden flex"
+                    initial={{ opacity: 0, y: 60, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                    className="mt-16 sm:mt-24 relative w-full max-w-5xl"
                 >
-                    <div className="w-16 md:w-48 h-full bg-white/5 border-r border-white/10 flex flex-col p-4 gap-4">
-                        <div className="h-4 w-full bg-white/10 rounded-full mb-8"></div>
-                        {[1,2,3,4,5].map(i => <div key={i} className="h-8 w-full bg-white/5 rounded-lg"></div>)}
-                    </div>
-                    <div className="flex-1 p-6 md:p-10 flex flex-col">
-                        <div className="h-8 w-48 bg-white/10 rounded-lg mb-8"></div>
-                        <div className="flex gap-4 mb-6">
-                            <div className="h-24 flex-1 bg-gradient-to-br from-brand-500/20 to-indigo-500/20 rounded-xl border border-white/5"></div>
-                            <div className="h-24 flex-1 bg-gradient-to-br from-brand-500/20 to-indigo-500/20 rounded-xl border border-white/5"></div>
-                            <div className="h-24 flex-1 bg-gradient-to-br from-brand-500/20 to-indigo-500/20 rounded-xl border border-white/5 hidden md:block"></div>
-                        </div>
-                        <div className="flex-1 w-full bg-white/5 rounded-xl border border-white/10 mt-4 p-4 flex flex-col">
-                            <div className="w-full flex justify-between items-center mb-6">
-                                <div className="h-4 w-32 bg-white/10 rounded-full"></div>
-                                <div className="h-8 w-24 bg-brand-500/80 rounded-full"></div>
+                    <div className="glass-card rounded-3xl overflow-hidden shadow-glass-lg">
+                        <div className="flex">
+                            {/* Mock Sidebar */}
+                            <div className="w-14 sm:w-52 h-[400px] sm:h-[480px] border-r border-border/50 p-3 sm:p-4 flex flex-col gap-3 bg-white/5 dark:bg-black/10 shrink-0">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <div className="w-7 h-7 rounded-lg bg-brand-500/20 shrink-0" />
+                                    <div className="h-3 w-20 bg-foreground/10 rounded-full hidden sm:block" />
+                                </div>
+                                {[1,2,3,4,5,6].map(i => (
+                                    <div key={i} className={`flex items-center gap-2 px-2 py-2 rounded-xl transition-all ${i === 1 ? 'bg-brand-500/10' : ''}`}>
+                                        <div className={`w-5 h-5 rounded-lg shrink-0 ${i === 1 ? 'bg-brand-500/30' : 'bg-foreground/5'}`} />
+                                        <div className={`h-2.5 rounded-full hidden sm:block ${i === 1 ? 'w-20 bg-brand-500/20' : 'w-16 bg-foreground/5'}`} />
+                                    </div>
+                                ))}
                             </div>
-                            <div className="flex-1 bg-black/50 rounded-lg flex items-center justify-center border border-white/5">
-                                <Activity className="w-12 h-12 text-white/20" />
+                            {/* Mock Content */}
+                            <div className="flex-1 p-4 sm:p-8 flex flex-col">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="h-4 w-32 bg-foreground/10 rounded-full" />
+                                    <div className="flex gap-2">
+                                        <div className="w-8 h-8 rounded-full bg-foreground/5" />
+                                        <div className="w-8 h-8 rounded-full bg-brand-500/20" />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                                    {[1,2,3].map(i => (
+                                        <div key={i} className={`h-24 sm:h-28 rounded-2xl border border-border/30 bg-brand-500/5 flex flex-col items-center justify-center gap-2 ${i === 3 ? 'hidden sm:flex' : ''}`}>
+                                            <div className="w-8 h-8 rounded-xl bg-brand-500/10" />
+                                            <div className="h-2 w-16 rounded-full bg-foreground/5" />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex-1 rounded-2xl border border-border/30 bg-white/5 dark:bg-black/10 p-4 sm:p-6">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className="h-3 w-24 bg-foreground/10 rounded-full" />
+                                        <div className="h-8 w-20 bg-brand-500/30 rounded-full" />
+                                    </div>
+                                    <div className="flex-1 h-32 rounded-xl bg-gradient-to-br from-brand-500/5 to-brand-400/5 border border-border/20 flex items-center justify-center">
+                                        <Sparkles className="w-10 h-10 text-brand-400/30" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    {/* Gloss Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none mix-blend-overlay"></div>
+                    {/* Glow effect behind the preview */}
+                    <div className="absolute inset-0 -z-10 bg-brand-400/10 rounded-3xl blur-3xl scale-95" />
                 </motion.div>
             </section>
 
-            {/* Feature Highlights section */}
-            <section id="features" className="py-24 px-6 md:px-12 max-w-7xl mx-auto relative z-10">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-bold mb-4">Every tool you need, one platform.</h2>
-                    <p className="text-slate-400">Say goodbye to 10 different subscriptions.</p>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-6">
-                    {/* Feature Cards */}
-                    {[
-                        { icon: <FileImage className="w-6 h-6 text-pink-400" />, title: "AI Image & Video", desc: "Generate stunning media instantly from simple text prompts using state-of-the-art AI models." },
-                        { icon: <Cpu className="w-6 h-6 text-brand-400" />, title: "Intelligent Chat", desc: "Access the best LLMs dynamically, customized for rapid problem-solving and coding." },
-                        { icon: <FileText className="w-6 h-6 text-indigo-400" />, title: "Document Wizard", desc: "Merge, compress, and convert PDFs or Word docs on the fly without watermarks." },
-                    ].map((feature, i) => (
-                        <motion.div 
-                            key={i}
-                            whileHover={{ y: -5 }}
-                            className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm shadow-xl flex flex-col gap-4 relative overflow-hidden group"
-                        >
-                            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                                {feature.icon}
-                            </div>
-                            <h3 className="text-xl font-bold">{feature.title}</h3>
-                            <p className="text-slate-400 flex-1">{feature.desc}</p>
-                            
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity scale-150 transform translate-x-1/4 -translate-y-1/4 pointer-events-none">
-                                {feature.icon}
-                            </div>
-                        </motion.div>
-                    ))}
+            {/* ====== STATS BAR ====== */}
+            <section id="stats" className="py-16 px-4 sm:px-8">
+                <div className="max-w-4xl mx-auto">
+                    <motion.div 
+                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        variants={stagger}
+                        className="glass-card rounded-3xl p-6 sm:p-10 grid grid-cols-2 md:grid-cols-4 gap-6"
+                    >
+                        {stats.map((s, i) => (
+                            <motion.div key={i} variants={fadeIn} className="text-center">
+                                <p className="text-3xl sm:text-4xl font-extrabold text-gradient mb-1">{s.value}</p>
+                                <p className="text-sm text-muted-foreground font-medium">{s.label}</p>
+                            </motion.div>
+                        ))}
+                    </motion.div>
                 </div>
             </section>
+
+            {/* ====== FEATURES GRID ====== */}
+            <section id="features" className="py-20 px-4 sm:px-8 relative z-10">
+                <div className="max-w-7xl mx-auto">
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-16">
+                        <motion.div variants={fadeIn} className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-xs font-semibold text-brand-500 uppercase tracking-wider mb-4">
+                            <Zap className="w-3 h-3" /> Features
+                        </motion.div>
+                        <motion.h2 variants={fadeIn} className="text-3xl md:text-5xl font-extrabold mb-4 text-foreground">
+                            Every tool you need,<br /><span className="text-gradient">one platform.</span>
+                        </motion.h2>
+                        <motion.p variants={fadeIn} className="text-muted-foreground max-w-lg mx-auto">
+                            Say goodbye to 10 different subscriptions. Everything is built-in and ready to use.
+                        </motion.p>
+                    </motion.div>
+
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {features.map((feature, i) => (
+                            <motion.div 
+                                key={i}
+                                variants={fadeIn}
+                                whileHover={{ y: -6, scale: 1.02 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                className="glass-card rounded-3xl p-7 flex flex-col gap-4 group cursor-pointer"
+                            >
+                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `${feature.color}18` }}>
+                                    <feature.icon className="w-6 h-6" style={{ color: feature.color }} />
+                                </div>
+                                <h3 className="text-lg font-bold text-foreground group-hover:text-brand-500 transition-colors">{feature.title}</h3>
+                                <p className="text-muted-foreground text-sm leading-relaxed flex-1">{feature.desc}</p>
+                                <div className="flex items-center gap-1 text-sm font-semibold text-brand-500 opacity-0 group-hover:opacity-100 transition-all translate-x-0 group-hover:translate-x-1">
+                                    Explore <ChevronRight className="w-4 h-4" />
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* ====== TRUST SECTION ====== */}
+            <section className="py-20 px-4 sm:px-8 relative z-10">
+                <div className="max-w-5xl mx-auto">
+                    <motion.div 
+                        initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
+                        className="glass-card rounded-3xl p-8 sm:p-12 grid md:grid-cols-3 gap-8"
+                    >
+                        {[
+                            { icon: Shield, title: 'Secure by Default', desc: 'All data is encrypted in transit and at rest. Your files never leave your browser.' },
+                            { icon: Zap, title: 'Blazing Fast', desc: 'Client-side processing for most tools. No uploads, no waiting, instant results.' },
+                            { icon: Globe, title: 'Works Everywhere', desc: 'Fully responsive. Works on desktop, tablet, and mobile browsers seamlessly.' },
+                        ].map((item, i) => (
+                            <motion.div key={i} variants={fadeIn} className="text-center flex flex-col items-center gap-3">
+                                <div className="w-14 h-14 rounded-2xl bg-brand-500/10 flex items-center justify-center mb-2">
+                                    <item.icon className="w-6 h-6 text-brand-500" />
+                                </div>
+                                <h3 className="text-lg font-bold text-foreground">{item.title}</h3>
+                                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* ====== CTA SECTION ====== */}
+            <section id="cta" className="py-20 px-4 sm:px-8 relative z-10">
+                <div className="max-w-3xl mx-auto text-center">
+                    <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+                        <motion.h2 variants={fadeIn} className="text-3xl md:text-5xl font-extrabold mb-4 text-foreground">
+                            Ready to supercharge<br />your workflow?
+                        </motion.h2>
+                        <motion.p variants={fadeIn} className="text-muted-foreground mb-10 max-w-lg mx-auto">
+                            Join thousands of students and developers already using ToolMate AI. Free forever.
+                        </motion.p>
+                        <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link to="/register" className="btn-primary h-14 px-10 text-base rounded-2xl gap-2 group">
+                                Create Free Account
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                        </motion.div>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* ====== FOOTER ====== */}
+            <footer className="py-10 px-4 sm:px-8 border-t border-border/50 relative z-10">
+                <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1 rounded-lg bg-gradient-to-tr from-brand-600 to-brand-400">
+                            <TbApiApp className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-sm font-semibold text-foreground">ToolMate AI</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">© 2026 ToolMate AI. Built for the future.</p>
+                </div>
+            </footer>
         </div>
     );
 }

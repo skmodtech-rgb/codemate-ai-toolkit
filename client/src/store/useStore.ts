@@ -26,6 +26,10 @@ export const useStore = create<AppState>((set) => {
     const savedTheme = localStorage.getItem('toolmate_theme');
     const isDarkMode = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
+    // Apply theme class immediately on load
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(isDarkMode ? 'dark' : 'light');
+
     return {
         user,
         isDarkMode,

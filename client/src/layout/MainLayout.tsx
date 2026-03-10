@@ -1,20 +1,19 @@
-import { useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { 
     LayoutDashboard, Image as ImageIcon, Video, Code, Menu, Search, Sun, Moon, X,
-    MessageSquare, Settings, LogOut, ChevronDown, MoreHorizontal,
-    AlignLeft, Key, Binary, Hash as HashIcon, QrCode, Type, RefreshCw,
-    FileText, MonitorPlay, Share2, Scissors
+    MessageSquare, LogOut, ChevronDown,
+    Key, Binary, Hash as HashIcon, QrCode, Type, RefreshCw,
+    FileText, MonitorPlay, Scissors, User, Settings, Lock
 } from 'lucide-react';
 import { TbApiApp } from "react-icons/tb";
 
 const sidebarCategories = [
     { 
-        title: 'AI Creator Studio', 
-        emoji: '🎨',
-        sectionId: 'ai-creator-studio',
+        title: 'AI Studio', 
+        icon: '🎨',
         items: [
             { name: 'Image Generator', icon: ImageIcon, path: '/app/image-generator' },
             { name: 'Video Generator', icon: Video, path: '/app/video-generator' },
@@ -22,9 +21,8 @@ const sidebarCategories = [
         ]
     },
     { 
-        title: 'Document Workshop', 
-        emoji: '📄',
-        sectionId: 'document-workshop',
+        title: 'Documents', 
+        icon: '📄',
         items: [
             { name: 'PDF Merger', icon: FileText, path: '/app/pdf-merger' },
             { name: 'PDF Splitter', icon: FileText, path: '/app/pdf-splitter' },
@@ -32,53 +30,39 @@ const sidebarCategories = [
         ]
     },
     { 
-        title: 'Media Studio', 
-        emoji: '🎬',
-        sectionId: 'media-studio',
+        title: 'Media', 
+        icon: '🎬',
         items: [
-            { name: 'Image Compressor', icon: MonitorPlay, path: '/app/image-compressor' },
-            { name: 'Background Remover', icon: Scissors, path: '/app/bg-remover' },
-            { name: 'Screen Recorder', icon: MonitorPlay, path: '/app/screen-recorder' },
+            { name: 'Compressor', icon: MonitorPlay, path: '/app/image-compressor' },
+            { name: 'BG Remover', icon: Scissors, path: '/app/bg-remover' },
+            { name: 'Screen Rec', icon: MonitorPlay, path: '/app/screen-recorder' },
         ]
     },
     { 
-        title: 'Data Intelligence', 
-        emoji: '📊',
-        sectionId: 'data-intelligence',
+        title: 'Data', 
+        icon: '📊',
         items: [
-            { name: 'JSON Formatter', icon: Code, path: '/app/json-formatter' },
-            { name: 'JSON to CSV', icon: RefreshCw, path: '/app/json-to-csv' },
+            { name: 'JSON Tools', icon: Code, path: '/app/json-formatter' },
+            { name: 'CSV Convert', icon: RefreshCw, path: '/app/json-to-csv' },
             { name: 'QR Generator', icon: QrCode, path: '/app/qr-generator' },
         ]
     },
     { 
-        title: 'Developer Toolkit', 
-        emoji: '🔧',
-        sectionId: 'developer-toolkit',
+        title: 'Dev Tools', 
+        icon: '🔧',
         items: [
-            { name: 'Base64 Encoder', icon: Binary, path: '/app/base64' },
-            { name: 'Hash Generator', icon: HashIcon, path: '/app/hash-generator' },
-            { name: 'JWT Debugger', icon: Key, path: '/app/jwt-debugger' },
+            { name: 'Base64', icon: Binary, path: '/app/base64' },
+            { name: 'Hash Gen', icon: HashIcon, path: '/app/hash-generator' },
+            { name: 'JWT Debug', icon: Key, path: '/app/jwt-debugger' },
         ]
     },
     { 
-        title: 'Utility Hub', 
-        emoji: '⚙️',
-        sectionId: 'utility-hub',
+        title: 'Utilities', 
+        icon: '⚙️',
         items: [
-            { name: 'Password Generator', icon: Key, path: '/app/password-generator' },
-            { name: 'Word Counter', icon: Type, path: '/app/word-counter' },
-            { name: 'Lorem Ipsum', icon: AlignLeft, path: '/app/lorem-ipsum' },
-        ]
-    },
-    { 
-        title: 'Content Creator', 
-        emoji: '📱',
-        sectionId: 'content-creator-suite',
-        items: [
-            { name: 'Tweet Generator', icon: MessageSquare, path: '/app/tweet-generator' },
-            { name: 'Hashtag Generator', icon: HashIcon, path: '/app/hashtag-generator' },
-            { name: 'Caption Writer', icon: Share2, path: '/app/caption-writer' },
+            { name: 'Passwords', icon: Key, path: '/app/password-generator' },
+            { name: 'Word Count', icon: Type, path: '/app/word-counter' },
+            { name: 'Lorem Ipsum', icon: Type, path: '/app/lorem-ipsum' },
         ]
     },
 ];
@@ -86,167 +70,161 @@ const sidebarCategories = [
 export default function MainLayout() {
     const { isSidebarOpen, toggleSidebar, isDarkMode, toggleTheme, user, logout } = useStore();
     const location = useLocation();
-    const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({});
+    const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const profileRef = useRef<HTMLDivElement>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
-    const toggleCategory = (title: string) => {
-        setExpandedCategories(prev => ({ ...prev, [title]: !prev[title] }));
-    };
+    // Close profile dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+                setProfileOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
-    const handleSeeMore = (sectionId: string) => {
-        setMobileMenuOpen(false);
-        if (location.pathname !== '/app') {
-            navigate('/app');
-            // Wait for navigation then scroll
-            setTimeout(() => {
-                const el = document.getElementById(sectionId);
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 300);
-        } else {
-            const el = document.getElementById(sectionId);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    };
+    // Auto-expand category that contains the active route
+    useEffect(() => {
+        const active = sidebarCategories.find(cat => 
+            cat.items.some(item => location.pathname === item.path)
+        );
+        if (active) setExpandedCategory(active.title);
+    }, [location.pathname]);
 
-    const handleNavClick = () => {
-        setMobileMenuOpen(false);
-    };
+    const handleNavClick = () => setMobileMenuOpen(false);
 
     const SidebarContent = ({ mobile = false }: { mobile?: boolean }) => (
         <div className="flex flex-col h-full">
-            {/* Logo Area */}
-            <div className="flex h-16 items-center px-4 border-b border-border justify-between overflow-hidden">
+            {/* Logo */}
+            <div className="flex h-16 items-center px-4 justify-between shrink-0">
                 <AnimatePresence mode='wait'>
                     {(isSidebarOpen || mobile) && (
                         <motion.div
-                            initial={{ opacity: 0, x: -20 }}
+                            initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="flex items-center gap-2"
+                            exit={{ opacity: 0, x: -10 }}
+                            className="flex items-center gap-2.5"
                         >
-                            <div className="p-1 rounded-md bg-gradient-to-tr from-brand-600 to-brand-400">
-                                <TbApiApp className="w-6 h-6 text-white" />
+                            <div className="p-1.5 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 shadow-md shadow-brand-500/20">
+                                <TbApiApp className="w-5 h-5 text-white" />
                             </div>
-                            <span className="font-bold text-xl tracking-tight">ToolMate</span>
+                            <span className="font-bold text-lg tracking-tight text-foreground">ToolMate</span>
                         </motion.div>
                     )}
                 </AnimatePresence>
                 {mobile ? (
-                    <button 
-                        onClick={() => setMobileMenuOpen(false)} 
-                        className="p-1.5 rounded-lg hover:bg-white/10 text-foreground transition-colors"
-                    >
-                        <X className="w-5 h-5" />
+                    <button onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-xl hover:bg-[var(--hover-bg)] transition-all">
+                        <X className="w-5 h-5 text-foreground" />
                     </button>
                 ) : (
-                    <button 
-                        onClick={toggleSidebar} 
-                        className="p-1.5 rounded-lg hover:bg-white/10 text-foreground transition-colors hidden lg:block"
-                    >
-                        <Menu className="w-5 h-5" />
+                    <button onClick={toggleSidebar} className="p-2 rounded-xl hover:bg-[var(--hover-bg)] transition-all hidden lg:block">
+                        <Menu className="w-4 h-4 text-muted-foreground" />
                     </button>
                 )}
             </div>
 
             {/* Dashboard Link */}
-            <div className="px-3 pt-4">
+            <div className="px-3 pt-2 pb-1">
                 <Link
                     to="/app"
                     onClick={handleNavClick}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group relative overflow-hidden ${
-                        location.pathname === '/app'
-                            ? 'bg-brand-500/10 text-brand-400 font-medium' 
-                            : 'text-foreground/70 hover:bg-white/5 hover:text-foreground'
-                    }`}
+                    className={`sidebar-item ${location.pathname === '/app' ? 'active' : ''}`}
                 >
                     {location.pathname === '/app' && (
-                        <motion.div layoutId="sidebar-active-indicator" className="absolute left-0 w-1 h-1/2 bg-brand-500 rounded-r-full" />
+                        <motion.div layoutId="sidebar-pill" className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-500 rounded-r-full" />
                     )}
-                    <LayoutDashboard className={`w-5 h-5 flex-shrink-0 ${location.pathname === '/app' ? 'text-brand-500' : 'group-hover:text-brand-500'}`} />
-                    {(isSidebarOpen || mobile) && <span className="whitespace-nowrap font-medium">Dashboard</span>}
+                    <LayoutDashboard className={`w-[18px] h-[18px] shrink-0 ${location.pathname === '/app' ? 'text-brand-500' : 'text-muted-foreground'}`} />
+                    {(isSidebarOpen || mobile) && <span className="text-sm font-medium">Dashboard</span>}
                 </Link>
             </div>
 
-            {/* Sidebar Navigation */}
-            <div className="flex-1 overflow-y-auto no-scrollbar py-3 flex flex-col gap-1">
-                {sidebarCategories.map((category, i) => {
-                    const isExpanded = expandedCategories[category.title] ?? true;
+            {/* Divider */}
+            <div className="mx-4 my-2 h-px bg-border/50" />
+
+            {/* Navigation Categories */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar py-1 px-3 space-y-0.5">
+                {sidebarCategories.map((category) => {
+                    const isExpanded = expandedCategory === category.title;
+                    const hasActive = category.items.some(item => location.pathname === item.path);
+                    
                     return (
-                        <div key={i} className="px-3">
-                            {(isSidebarOpen || mobile) && (
+                        <div key={category.title}>
+                            {(isSidebarOpen || mobile) ? (
                                 <button 
-                                    onClick={() => toggleCategory(category.title)}
-                                    className="w-full flex items-center justify-between px-2 py-2 text-xs font-semibold text-foreground/40 uppercase tracking-wider hover:text-foreground/60 transition-colors"
+                                    onClick={() => setExpandedCategory(isExpanded ? null : category.title)}
+                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${
+                                        hasActive ? 'text-brand-500' : 'text-muted-foreground hover:text-foreground'
+                                    }`}
                                 >
-                                    <span className="flex items-center gap-1.5">
-                                        <span>{category.emoji}</span>
-                                        <span className="truncate">{category.title}</span>
+                                    <span className="flex items-center gap-2">
+                                        <span className="text-sm">{category.icon}</span>
+                                        <span>{category.title}</span>
                                     </span>
-                                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`} />
                                 </button>
-                            )}
-                            {isExpanded && (
-                                <div className="space-y-0.5">
-                                    {category.items.map((item, j) => {
-                                        const isActive = location.pathname === item.path;
-                                        return (
-                                            <Link
-                                                key={j}
-                                                to={item.path}
-                                                onClick={handleNavClick}
-                                                className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all group relative overflow-hidden text-sm ${
-                                                    isActive 
-                                                        ? 'bg-brand-500/10 text-brand-400 font-medium' 
-                                                        : 'text-foreground/70 hover:bg-white/5 hover:text-foreground'
-                                                }`}
-                                            >
-                                                {isActive && (
-                                                    <motion.div layoutId="sidebar-active-indicator" className="absolute left-0 w-1 h-1/2 bg-brand-500 rounded-r-full" />
-                                                )}
-                                                <item.icon className={`w-4 h-4 flex-shrink-0 transition-colors ${isActive ? 'text-brand-500' : 'group-hover:text-brand-500'}`} />
-                                                {(isSidebarOpen || mobile) && (
-                                                    <span className="origin-left whitespace-nowrap truncate">
-                                                        {item.name}
-                                                    </span>
-                                                )}
-                                            </Link>
-                                        );
-                                    })}
-                                    {/* See More Link */}
-                                    {(isSidebarOpen || mobile) && (
-                                        <button
-                                            onClick={() => handleSeeMore(category.sectionId)}
-                                            className="flex items-center gap-3 px-3 py-1.5 rounded-xl transition-all text-xs text-brand-400/70 hover:text-brand-400 hover:bg-white/5 w-full"
-                                        >
-                                            <MoreHorizontal className="w-4 h-4 flex-shrink-0" />
-                                            <span>See all tools</span>
-                                        </button>
-                                    )}
+                            ) : (
+                                <div className="flex justify-center py-2 text-sm" title={category.title}>
+                                    {category.icon}
                                 </div>
                             )}
+                            
+                            <AnimatePresence>
+                                {isExpanded && (isSidebarOpen || mobile) && (
+                                    <motion.div 
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="space-y-0.5 pb-1">
+                                            {category.items.map((item) => {
+                                                const isActive = location.pathname === item.path;
+                                                return (
+                                                    <Link
+                                                        key={item.path}
+                                                        to={item.path}
+                                                        onClick={handleNavClick}
+                                                        className={`sidebar-item text-sm ml-2 ${isActive ? 'active' : 'text-muted-foreground hover:text-foreground'}`}
+                                                    >
+                                                        {isActive && (
+                                                            <motion.div layoutId="sidebar-pill" className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-500 rounded-r-full" />
+                                                        )}
+                                                        <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand-500' : ''}`} />
+                                                        <span className="truncate">{item.name}</span>
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     );
                 })}
             </div>
 
             {/* Bottom User Area */}
-            <div className="p-4 border-t border-border mt-auto">
+            <div className="p-3 border-t border-border/50 mt-auto shrink-0">
                 {(isSidebarOpen || mobile) ? (
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-tr from-brand-600 to-indigo-500 text-white font-bold shrink-0 shadow-md">
+                    <div className="flex items-center gap-3 px-2 py-1.5">
+                        <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-gradient-to-tr from-brand-500 to-brand-400 text-white font-bold text-sm shrink-0 shadow-md shadow-brand-500/20">
                             {user?.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold truncate text-foreground">{user?.name}</p>
-                            <p className="text-xs text-foreground/50 truncate">{user?.email}</p>
+                            <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
                         </div>
-                        <button onClick={logout} className="p-1.5 rounded-lg text-foreground/50 hover:bg-white/10 hover:text-red-500 transition-colors">
+                        <button onClick={logout} className="p-2 rounded-xl hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-all" title="Sign Out">
                             <LogOut className="w-4 h-4" />
                         </button>
                     </div>
                 ) : (
-                    <button onClick={logout} className="w-full h-9 flex items-center justify-center rounded-lg text-foreground/50 hover:bg-white/10 hover:text-red-500 transition-colors tooltip" title="Logout">
+                    <button onClick={logout} className="w-full flex items-center justify-center p-2 rounded-xl hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-all" title="Sign Out">
                         <LogOut className="w-5 h-5" />
                     </button>
                 )}
@@ -255,12 +233,17 @@ export default function MainLayout() {
     );
 
     return (
-        <div className="flex h-screen overflow-hidden bg-background">
+        <div className="flex h-screen overflow-hidden relative">
+            {/* Background Orbs (subtle) */}
+            <div className="bg-orb w-[400px] h-[400px] bg-brand-300/20 top-[-100px] right-[-100px] animate-blob" />
+            <div className="bg-orb w-[300px] h-[300px] bg-brand-400/15 bottom-[-50px] left-[30%] animate-blob animation-delay-4000" />
+
             {/* Desktop Sidebar */}
             <motion.aside
                 initial={false}
-                animate={{ width: isSidebarOpen ? '16rem' : '4.5rem' }}
-                className="relative z-20 flex-shrink-0 hidden lg:flex flex-col border-r border-border bg-card shadow-sm h-full"
+                animate={{ width: isSidebarOpen ? '15rem' : '4.5rem' }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="relative z-20 shrink-0 hidden lg:flex flex-col glass-sidebar h-full"
             >
                 <SidebarContent />
             </motion.aside>
@@ -269,21 +252,19 @@ export default function MainLayout() {
             <AnimatePresence>
                 {mobileMenuOpen && (
                     <>
-                        {/* Backdrop */}
                         <motion.div 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+                            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
                             onClick={() => setMobileMenuOpen(false)}
                         />
-                        {/* Mobile Sidebar */}
                         <motion.aside 
                             initial={{ x: '-100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '-100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="fixed inset-y-0 left-0 w-[280px] z-50 bg-card border-r border-border shadow-2xl lg:hidden flex flex-col"
+                            className="fixed inset-y-0 left-0 w-[280px] z-50 glass-sidebar shadow-glass-lg lg:hidden flex flex-col"
                         >
                             <SidebarContent mobile />
                         </motion.aside>
@@ -292,61 +273,150 @@ export default function MainLayout() {
             </AnimatePresence>
 
             {/* Main Content Area */}
-            <main className="flex-1 flex flex-col h-full bg-background relative overflow-hidden min-w-0">
+            <main className="flex-1 flex flex-col h-full relative overflow-hidden min-w-0">
                 {/* Top Navbar */}
-                <header className="h-14 sm:h-16 flex-shrink-0 px-4 sm:px-6 border-b border-border flex items-center justify-between bg-card/50 backdrop-blur-sm z-10 sticky top-0">
+                <header className="h-16 shrink-0 px-4 sm:px-6 glass-navbar flex items-center justify-between z-10 sticky top-0">
                     <div className="flex items-center gap-3">
-                        {/* Mobile Menu Button */}
+                        {/* Mobile menu trigger */}
                         <button 
                             onClick={() => setMobileMenuOpen(true)} 
-                            className="p-2 rounded-lg hover:bg-white/10 text-foreground transition-colors lg:hidden"
+                            className="p-2 rounded-xl hover:bg-[var(--hover-bg)] transition-all lg:hidden"
                         >
-                            <Menu className="w-5 h-5" />
+                            <Menu className="w-5 h-5 text-foreground" />
                         </button>
 
-                        {/* Mobile Logo (shown only on mobile) */}
+                        {/* Mobile Logo */}
                         <div className="flex items-center gap-2 lg:hidden">
-                            <div className="p-1 rounded-md bg-gradient-to-tr from-brand-600 to-brand-400">
-                                <TbApiApp className="w-5 h-5 text-white" />
+                            <div className="p-1 rounded-lg bg-gradient-to-tr from-brand-600 to-brand-400">
+                                <TbApiApp className="w-4 h-4 text-white" />
                             </div>
-                            <span className="font-bold text-lg tracking-tight">ToolMate</span>
+                            <span className="font-bold text-base tracking-tight text-foreground">ToolMate</span>
                         </div>
 
                         {/* Desktop Search */}
-                        <div className="relative hidden md:block group">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-brand-500" />
+                        <div className="relative hidden md:block">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <input 
                                 type="text" 
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
                                 placeholder="Search tools..." 
-                                className="pl-9 pr-4 py-2 text-sm rounded-full bg-background border border-border focus:outline-none focus:ring-2 focus:ring-brand-500/50 w-48 lg:w-64 transition-all"
+                                className="glass-input pl-9 pr-4 py-2.5 text-sm rounded-xl w-56 lg:w-72"
                             />
                         </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 sm:gap-3">
-                        <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center">
-                            {isDarkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-slate-400" />}
+                    <div className="flex items-center gap-2">
+                        {/* Theme Toggle */}
+                        <button 
+                            onClick={toggleTheme} 
+                            className="p-2.5 rounded-xl hover:bg-[var(--hover-bg)] transition-all relative overflow-hidden group"
+                            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                        >
+                            <AnimatePresence mode="wait">
+                                {isDarkMode ? (
+                                    <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                                        <Sun className="w-[18px] h-[18px] text-amber-400" />
+                                    </motion.div>
+                                ) : (
+                                    <motion.div key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                                        <Moon className="w-[18px] h-[18px] text-brand-500" />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </button>
-                        <button className="p-2 rounded-full hover:bg-white/10 transition-colors hidden sm:flex items-center justify-center">
-                            <Settings className="w-5 h-5 text-foreground/70" />
-                        </button>
-                        <div className="h-6 w-px bg-border mx-1 hidden sm:block"></div>
-                        <div className="text-sm font-medium mr-2 hidden sm:block">
-                            Hi, {user?.name.split(' ')[0]} 👋
+
+                        {/* Divider */}
+                        <div className="h-6 w-px bg-border hidden sm:block" />
+
+                        {/* Profile Dropdown */}
+                        <div className="relative" ref={profileRef}>
+                            <button 
+                                onClick={() => setProfileOpen(!profileOpen)}
+                                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-xl hover:bg-[var(--hover-bg)] transition-all"
+                            >
+                                <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-gradient-to-tr from-brand-500 to-brand-400 text-white font-bold text-xs shadow-sm">
+                                    {user?.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="text-sm font-medium text-foreground hidden sm:block">{user?.name.split(' ')[0]}</span>
+                                <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground hidden sm:block transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            <AnimatePresence>
+                                {profileOpen && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="absolute right-0 mt-2 w-64 glass-card rounded-2xl shadow-glass-lg overflow-hidden z-50"
+                                    >
+                                        {/* User info */}
+                                        <div className="p-4 border-b border-border/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-tr from-brand-500 to-brand-400 text-white font-bold text-sm shadow-md">
+                                                    {user?.name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-semibold text-foreground truncate">{user?.name}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Menu items */}
+                                        <div className="p-2">
+                                            <Link 
+                                                to="/app/profile"
+                                                onClick={() => setProfileOpen(false)}
+                                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground hover:bg-[var(--hover-bg)] transition-all"
+                                            >
+                                                <User className="w-4 h-4 text-muted-foreground" />
+                                                <span>My Profile</span>
+                                            </Link>
+                                            <Link 
+                                                to="/app/settings"
+                                                onClick={() => setProfileOpen(false)}
+                                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground hover:bg-[var(--hover-bg)] transition-all"
+                                            >
+                                                <Settings className="w-4 h-4 text-muted-foreground" />
+                                                <span>Settings</span>
+                                            </Link>
+                                            <Link
+                                                to="/app/change-password"
+                                                onClick={() => setProfileOpen(false)}
+                                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground hover:bg-[var(--hover-bg)] transition-all"
+                                            >
+                                                <Lock className="w-4 h-4 text-muted-foreground" />
+                                                <span>Change Password</span>
+                                            </Link>
+                                        </div>
+                                        {/* Sign out */}
+                                        <div className="p-2 border-t border-border/50">
+                                            <button 
+                                                onClick={() => { logout(); setProfileOpen(false); }}
+                                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-500/10 transition-all w-full"
+                                            >
+                                                <LogOut className="w-4 h-4" />
+                                                <span>Sign Out</span>
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </header>
 
                 {/* Main scrollable view */}
-                <div className="flex-1 overflow-y-auto w-full p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-brand-950/20">
-                    <div className="max-w-7xl mx-auto h-full">
+                <div className="flex-1 overflow-y-auto custom-scrollbar w-full p-4 sm:p-6 lg:p-8 relative">
+                    <div className="max-w-7xl mx-auto h-full relative z-10">
                         <AnimatePresence mode='wait'>
                             <motion.div
                                 key={location.pathname}
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.2 }}
+                                exit={{ opacity: 0, y: -12 }}
+                                transition={{ duration: 0.25, ease: 'easeOut' }}
                                 className="min-h-full"
                             >
                                 <Outlet />

@@ -15,7 +15,7 @@ const categories = [
     {
         title: "AI CREATOR STUDIO",
         description: "Content Creation Superpowers",
-        color: "from-pink-500 to-rose-500",
+        color: "from-brand-500 to-brand-400",
         icon: Paintbrush,
         sectionId: "ai-creator-studio",
         tools: [
@@ -33,7 +33,7 @@ const categories = [
     {
         title: "DOCUMENT WORKSHOP",
         description: "PDF & Document Magic",
-        color: "from-emerald-500 to-green-500",
+        color: "from-brand-600 to-brand-500",
         icon: FileText,
         sectionId: "document-workshop",
         tools: [
@@ -51,7 +51,7 @@ const categories = [
     {
         title: "MEDIA STUDIO",
         description: "Image & Video Wizardry",
-        color: "from-cyan-500 to-blue-500",
+        color: "from-brand-400 to-brand-300",
         icon: MonitorPlay,
         sectionId: "media-studio",
         tools: [
@@ -70,7 +70,7 @@ const categories = [
     {
         title: "DATA INTELLIGENCE",
         description: "Transform Data into Insights",
-        color: "from-amber-500 to-orange-500",
+        color: "from-brand-500 to-brand-400",
         icon: Database,
         sectionId: "data-intelligence",
         tools: [
@@ -88,7 +88,7 @@ const categories = [
     {
         title: "DEVELOPER TOOLKIT",
         description: "For Coders & Engineers",
-        color: "from-indigo-500 to-violet-500",
+        color: "from-brand-600 to-brand-500",
         icon: TerminalSquare,
         sectionId: "developer-toolkit",
         tools: [
@@ -106,7 +106,7 @@ const categories = [
     {
         title: "UTILITY HUB",
         description: "Everyday Essential Tools",
-        color: "from-slate-500 to-gray-500",
+        color: "from-brand-400 to-brand-300",
         icon: Settings,
         sectionId: "utility-hub",
         tools: [
@@ -124,7 +124,7 @@ const categories = [
     {
         title: "CONTENT CREATOR SUITE",
         description: "Social Media & Marketing",
-        color: "from-fuchsia-500 to-purple-500",
+        color: "from-brand-500 to-brand-400",
         icon: Share2,
         sectionId: "content-creator-suite",
         tools: [
@@ -176,12 +176,12 @@ export default function Dashboard() {
                         <LayoutDashboard className="w-7 h-7 sm:w-8 sm:h-8 text-brand-500" />
                         Explore Toolkit
                     </h1>
-                    <p className="text-foreground/60 max-w-2xl text-sm sm:text-base">
+                    <p className="text-muted-foreground max-w-2xl text-sm sm:text-base">
                         Access all premium AI tools, media converters, and developer utilities organized into tailored categories.
                     </p>
                 </div>
                 <div className="flex gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-brand-500/10 text-brand-400 text-xs font-semibold uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full glass-card text-brand-500 text-xs font-semibold uppercase tracking-wider">
                         <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
                         System Online
                     </span>

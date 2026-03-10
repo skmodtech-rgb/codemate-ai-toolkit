@@ -64,6 +64,8 @@ import JsMinifier from './pages/tools/JsMinifier';
 import ApiTester from './pages/tools/ApiTester';
 import SqlFormatter from './pages/tools/SqlFormatter';
 import GenericTool from './pages/tools/GenericTool';
+import Profile from './pages/tools/Profile';
+import ChangePassword from './pages/tools/ChangePassword';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -78,12 +80,8 @@ function App() {
     const { isDarkMode } = useStore();
 
     useEffect(() => {
-        if (isDarkMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.classList.add('light');
-        }
+        document.documentElement.classList.remove('dark', 'light');
+        document.documentElement.classList.add(isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     return (
@@ -159,6 +157,11 @@ function App() {
                     <Route path="js-minifier" element={<JsMinifier />} />
                     <Route path="api-tester" element={<ApiTester />} />
                     <Route path="sql-formatter" element={<SqlFormatter />} />
+
+                    {/* Profile & Settings */}
+                    <Route path="profile" element={<Profile />} />
+                    <Route path="change-password" element={<ChangePassword />} />
+                    <Route path="settings" element={<Profile />} />
 
                     <Route path="*" element={<GenericTool />} />
                 </Route>
