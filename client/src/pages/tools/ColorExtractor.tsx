@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Palette, Upload, Copy, Check, Trash2 } from 'lucide-react';
 // @ts-ignore
-import ColorThief from 'colorthief';
+import { getPaletteSync } from 'colorthief';
 
 export default function ColorExtractor() {
     const [image, setImage] = useState<string | null>(null);
@@ -10,11 +10,6 @@ export default function ColorExtractor() {
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
     const imgRef = useRef<HTMLImageElement>(null);
 
-    const rgbToHex = (r: number, g: number, b: number) => 
-        '#' + [r, g, b].map(x => {
-            const hex = x.toString(16);
-            return hex.length === 1 ? '0' + hex : hex;
-        }).join('').toUpperCase();
 
     const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -30,10 +25,15 @@ export default function ColorExtractor() {
 
     const extractColors = () => {
         if (!imgRef.current) return;
-        const colorThief = new ColorThief();
-        const colors = colorThief.getPalette(imgRef.current, 8);
-        const hexColors = colors.map((rgb: number[]) => rgbToHex(rgb[0], rgb[1], rgb[2]));
-        setPalette(hexColors);
+        try {
+            const colors = getPaletteSync(imgRef.current, { colorCount: 8 });
+            if (colors) {
+                const hexColors = colors.map((c: any) => c.hex());
+                setPalette(hexColors);
+            }
+        } catch (err) {
+            console.error('Extraction failed:', err);
+        }
     };
 
     const copyColor = (color: string, index: number) => {

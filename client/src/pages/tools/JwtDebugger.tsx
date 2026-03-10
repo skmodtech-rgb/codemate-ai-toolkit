@@ -12,11 +12,20 @@ export default function JwtDebugger() {
         if (parts.length < 2) return { error: 'Invalid JWT structure' };
 
         try {
-            const header = JSON.parse(atob(parts[0]));
-            const payload = JSON.parse(atob(parts[1]));
+            const base64UrlDecode = (str: string) => {
+                const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+                const pad = base64.length % 4;
+                const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
+                return decodeURIComponent(atob(padded).split('').map(c => 
+                    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                ).join(''));
+            };
+
+            const header = JSON.parse(base64UrlDecode(parts[0]));
+            const payload = JSON.parse(base64UrlDecode(parts[1]));
             return { header, payload, signature: parts[2] || '', error: null };
         } catch (e) {
-            return { error: 'Failed to decode: Data is not valid JSON Base64' };
+            return { error: 'Failed to decode: Data is not valid JWT format' };
         }
     }, [token]);
 
