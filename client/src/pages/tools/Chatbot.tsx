@@ -15,8 +15,16 @@ export default function Chatbot() {
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-    const [provider, setProvider] = useState('ChatGPT');
-    const [model, setModel] = useState('GPT-5');
+    const MODELS: Record<string, string[]> = {
+        'Open AI Chat Gpt': ['openai/o3', 'openai/gpt-5.1-instant'],
+        'Anthropic(claude)': ['anthropic/claude-opus-4.1', 'anthropic/claude-sonnet-4.5'],
+        'Google(Gemini)': ['google/gemini-3-pro-preview', 'google/gemini-2.5-pro'],
+        'xAI(Grok)': ['xai/grok-4'],
+        'Perplexity': ['perplexity/sonar-pro']
+    };
+
+    const [provider, setProvider] = useState('Open AI Chat Gpt');
+    const [model, setModel] = useState('openai/o3');
     
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -93,21 +101,15 @@ export default function Chatbot() {
                     <select 
                         value={provider}
                         onChange={(e) => {
-                            setProvider(e.target.value);
-                            // Auto map models for demo demo
-                            if(e.target.value === 'ChatGPT') setModel('GPT-5');
-                            if(e.target.value === 'Gemini') setModel('Gemini-3');
-                            if(e.target.value === 'Claude') setModel('Claude-3');
-                            if(e.target.value === 'DeepSeek') setModel('DeepSeek-R1');
-                            if(e.target.value === 'Grok') setModel('Grok-2');
+                            const newProvider = e.target.value;
+                            setProvider(newProvider);
+                            setModel(MODELS[newProvider][0]);
                         }}
                         className="bg-background text-sm font-medium rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-sm border border-transparent hover:border-border transition-colors cursor-pointer"
                     >
-                        <option value="ChatGPT">ChatGPT</option>
-                        <option value="Claude">Claude</option>
-                        <option value="Gemini">Gemini</option>
-                        <option value="DeepSeek">DeepSeek</option>
-                        <option value="Grok">Grok</option>
+                        {Object.keys(MODELS).map(p => (
+                            <option key={p} value={p}>{p}</option>
+                        ))}
                     </select>
 
                     <select 
@@ -115,7 +117,9 @@ export default function Chatbot() {
                         onChange={(e) => setModel(e.target.value)}
                         className="bg-background text-sm text-foreground/70 rounded-lg px-3 py-1.5 focus:outline-none border border-transparent shadow-sm hover:border-border transition-colors cursor-pointer"
                     >
-                        <option value={model}>{model}</option>
+                        {MODELS[provider].map(m => (
+                            <option key={m} value={m}>{m}</option>
+                        ))}
                     </select>
                 </div>
             </div>
