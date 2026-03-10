@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import NotFound from './pages/NotFound';
 
 // Tools
 import ImageGenerator from './pages/tools/ImageGenerator';
@@ -167,6 +168,9 @@ function App() {
 
                     <Route path="*" element={<GenericTool />} />
                 </Route>
+
+                {/* Catch-all 404 Route */}
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </Router>
     );
