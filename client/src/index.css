@@ -9,7 +9,6 @@
 
 @layer base {
   :root {
-    /* Light Theme — Soft mint/teal glassmorphic */
     --color-background: #e8f4f0;
     --color-foreground: #1a2e35;
     --color-card: rgba(255, 255, 255, 0.65);
@@ -27,6 +26,9 @@
     --glass-shadow: 0 8px 32px rgba(45, 138, 138, 0.08);
     --input-bg: rgba(255, 255, 255, 0.6);
     --hover-bg: rgba(45, 138, 138, 0.08);
+    /* SOLID dropdown bg — NOT transparent */
+    --dropdown-bg: #f6faf9;
+    --dropdown-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 2px 10px rgba(0, 0, 0, 0.06);
   }
 
   .dark {
@@ -47,6 +49,8 @@
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     --input-bg: rgba(20, 40, 50, 0.6);
     --hover-bg: rgba(45, 138, 138, 0.12);
+    --dropdown-bg: #142832;
+    --dropdown-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   html {
@@ -61,8 +65,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    /* Smooth theme transitions */
-    transition: background 0.3s ease, color 0.3s ease;
   }
 
   * {
@@ -86,11 +88,6 @@
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
-    transition: box-shadow 0.25s ease, border-color 0.25s ease;
-  }
-
-  .glass-card:hover {
-    box-shadow: var(--glass-shadow), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15), 0 0 20px rgba(45, 138, 138, 0.06);
   }
 
   .glass-sidebar {
@@ -98,7 +95,6 @@
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border-right: 1px solid var(--glass-border);
-    will-change: width;
   }
 
   .glass-navbar {
@@ -115,7 +111,7 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
     color: var(--color-foreground);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   .glass-input::placeholder {
@@ -129,27 +125,36 @@
     outline: none;
   }
 
-  /* Primary Button — Soft Teal Gradient */
+  /* SOLID DROPDOWN — opaque background, no transparency */
+  .dropdown-solid {
+    background: var(--dropdown-bg);
+    border: 1px solid var(--glass-border);
+  }
+
+  .shadow-dropdown {
+    box-shadow: var(--dropdown-shadow);
+  }
+
+  /* Primary Button */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold text-white transition-all active:scale-95;
+    @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold text-white active:scale-[0.97];
     background: linear-gradient(135deg, #2d8a8a, #4da8a8);
     box-shadow: 0 4px 20px rgba(45, 138, 138, 0.25);
-    transition: box-shadow 0.25s ease, transform 0.15s ease;
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
   }
 
   .btn-primary:hover {
     box-shadow: 0 8px 30px rgba(45, 138, 138, 0.35);
-    transform: translateY(-1px);
   }
 
-  /* Secondary Button — Glass */
+  /* Secondary Button */
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold transition-all active:scale-95;
+    @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold active:scale-[0.97];
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
     color: var(--color-foreground);
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: background 0.15s ease, border-color 0.15s ease;
   }
 
   .btn-secondary:hover {
@@ -164,7 +169,7 @@
     backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
     color: var(--color-foreground);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   .input-field::placeholder {
@@ -178,9 +183,10 @@
     outline: none;
   }
 
-  /* Sidebar active item */
+  /* Sidebar item */
   .sidebar-item {
-    @apply flex items-center gap-3 px-3 py-2 rounded-xl transition-colors relative overflow-hidden;
+    @apply flex items-center gap-3 px-3 py-2 rounded-xl relative overflow-hidden;
+    transition: background-color 0.12s ease, color 0.12s ease;
   }
 
   .sidebar-item:hover {
@@ -195,25 +201,35 @@
 }
 
 /* ==============================
+   SIDEBAR TRANSITION (CSS only, no JS animation lib)
+   ============================== */
+.sidebar-transition {
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width;
+  overflow: hidden;
+}
+
+/* Mobile sidebar slide-in */
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+.mobile-sidebar-enter {
+  animation: slideInLeft 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ==============================
    UTILITY CLASSES
    ============================== */
-
-/* Hide scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar { width: 5px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(45, 138, 138, 0.15); border-radius: 100px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(45, 138, 138, 0.3); }
 .custom-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(45, 138, 138, 0.15) transparent; }
-
-/* Use GPU compositing for smoother scrolling */
-.custom-scrollbar {
-  -webkit-overflow-scrolling: touch;
-  transform: translateZ(0);
-}
+.custom-scrollbar { -webkit-overflow-scrolling: touch; }
 
 /* Floating orbs */
 .bg-orb {
@@ -223,15 +239,12 @@
   pointer-events: none;
   opacity: 0.4;
   z-index: 0;
-  will-change: transform;
 }
 .dark .bg-orb { opacity: 0.2; }
 
-/* Animation delays */
 .animation-delay-2000 { animation-delay: 2s; }
 .animation-delay-4000 { animation-delay: 4s; }
 
-/* Gradient text utility */
 .text-gradient {
   background: linear-gradient(135deg, #2d8a8a, #4da8a8);
   -webkit-background-clip: text;
@@ -239,7 +252,6 @@
   background-clip: text;
 }
 
-/* Blob animation for background */
 @keyframes blobMove {
   0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
   50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
@@ -247,12 +259,9 @@
 .blob-shape { animation: blobMove 7s ease-in-out infinite; }
 
 /* ==============================
-   RESPONSIVE BREAKPOINTS
+   RESPONSIVE
    ============================== */
 @media (max-width: 639px) {
-  /* Smaller padding on mobile */
-  .glass-card { padding: clamp(0.75rem, 3vw, 1.5rem); }
-  /* Reduce blur on mobile for performance */
   .glass-card, .glass-sidebar, .glass-navbar {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -264,7 +273,6 @@
   .dark .bg-orb { opacity: 0.12; }
 }
 
-/* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -274,7 +282,6 @@
   .bg-orb { display: none; }
 }
 
-/* Extra small breakpoint */
 @media (min-width: 475px) {
   .xs\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));

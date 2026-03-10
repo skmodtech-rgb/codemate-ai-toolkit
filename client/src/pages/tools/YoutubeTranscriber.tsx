@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Youtube, FileText, Loader2, AlertCircle, Play } from 'lucide-react';
 import axios from 'axios';
 
@@ -9,32 +8,88 @@ export default function YoutubeTranscriber() {
     const [resultText, setResultText] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const extractVideoId = (input: string): string | null => {
+        // Support various YouTube URL formats
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+            /^([a-zA-Z0-9_-]{11})$/, // Just the video ID
+        ];
+        for (const p of patterns) {
+            const match = input.match(p);
+            if (match) return match[1];
+        }
+        return null;
+    };
+
     const handleTranscribe = async () => {
         if (!url.trim()) return;
         setLoading(true);
         setError(null);
         setResultText(null);
 
+        const videoId = extractVideoId(url.trim());
+        if (!videoId) {
+            setError('Invalid YouTube URL. Please enter a valid YouTube video link.');
+            setLoading(false);
+            return;
+        }
+
         try {
-            const res = await axios.post('https://cmpunktg6.app.n8n.cloud/webhook/transcribe-video', { url });
+            const res = await axios.post('https://cmpunktg6.app.n8n.cloud/webhook/transcribe-video', { 
+                url: url.trim(),
+                videoId,
+            }, { timeout: 120000 });
             
-            const text = res.data?.transcript || res.data?.text || res.data?.output || res.data;
-            if (typeof text === 'string') {
+            // Handle various response formats
+            const data = res.data;
+            
+            if (typeof data === 'string') {
+                setResultText(data);
+            } else if (Array.isArray(data)) {
+                // Could be an array of transcript segments
+                const text = data.map((item: any) => {
+                    if (typeof item === 'string') return item;
+                    return item?.text || item?.content || item?.transcript || JSON.stringify(item);
+                }).join('\n\n');
                 setResultText(text);
-            } else if (typeof text === 'object') {
-                setResultText(JSON.stringify(text, null, 2));
+            } else if (typeof data === 'object' && data !== null) {
+                // Try common response keys
+                const text = data.transcript || data.text || data.output || data.result || data.content || data.transcription;
+                if (typeof text === 'string') {
+                    setResultText(text);
+                } else if (Array.isArray(text)) {
+                    const joined = text.map((item: any) => {
+                        if (typeof item === 'string') return item;
+                        return item?.text || item?.content || JSON.stringify(item);
+                    }).join('\n\n');
+                    setResultText(joined);
+                } else if (data.data) {
+                    // Nested data
+                    if (typeof data.data === 'string') {
+                        setResultText(data.data);
+                    } else {
+                        setResultText(JSON.stringify(data.data, null, 2));
+                    }
+                } else {
+                    // Last resort: pretty-print the JSON
+                    setResultText(JSON.stringify(data, null, 2));
+                }
             } else {
                 setError('Unexpected response format. Please try again.');
             }
         } catch (err: any) {
-            setError(err.response?.data?.message || err.message || 'An error occurred fetching the transcription.');
+            if (err.code === 'ECONNABORTED') {
+                setError('Request timed out. The video may be too long or the service is unavailable.');
+            } else {
+                setError(err.response?.data?.message || err.message || 'An error occurred fetching the transcription.');
+            }
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="pb-12 flex flex-col max-w-4xl mx-auto">
+        <div className="pb-12 flex flex-col max-w-4xl mx-auto">
             <div className="mb-6">
                 <h1 className="text-2xl sm:text-3xl font-extrabold flex items-center gap-3">
                     <div className="p-2 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/20">
@@ -57,6 +112,7 @@ export default function YoutubeTranscriber() {
                         placeholder="https://www.youtube.com/watch?v=..."
                         value={url}
                         onChange={e => setUrl(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') handleTranscribe(); }}
                     />
                     <button 
                         onClick={handleTranscribe}
@@ -70,33 +126,31 @@ export default function YoutubeTranscriber() {
             </div>
 
             {error && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl flex items-start gap-3 text-sm mb-6">
+                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl flex items-start gap-3 text-sm mb-6">
                     <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                     <p>{error}</p>
-                </motion.div>
+                </div>
             )}
 
-            <AnimatePresence>
-                {resultText && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl p-6 border-red-500/20">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                Transcription Result
-                            </h3>
-                            <button 
-                                onClick={() => navigator.clipboard.writeText(resultText)}
-                                className="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors font-semibold"
-                            >
-                                Copy Text
-                            </button>
-                        </div>
-                        <div className="w-full bg-background/50 rounded-xl p-4 border border-border shadow-inner max-h-[500px] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                            {resultText}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </motion.div>
+            {resultText && (
+                <div className="glass-card rounded-2xl p-6 border-red-500/20">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            Transcription Result
+                        </h3>
+                        <button 
+                            onClick={() => navigator.clipboard.writeText(resultText)}
+                            className="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors font-semibold"
+                        >
+                            Copy Text
+                        </button>
+                    </div>
+                    <div className="w-full bg-background/50 rounded-xl p-4 border border-border shadow-inner max-h-[500px] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                        {resultText}
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

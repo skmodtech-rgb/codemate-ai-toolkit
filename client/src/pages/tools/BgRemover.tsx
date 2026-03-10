@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Scissors, Upload, Download, Loader2, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import axios from 'axios';
 
@@ -32,19 +31,45 @@ export default function BgRemover() {
         setError(null);
         
         try {
-            // Send as JSON with base64 image data
+            // First try: expect binary/blob response (most BG removal APIs return raw image)
             const res = await axios.post('https://cmpunktg6.app.n8n.cloud/webhook/remove-bg', {
                 image: file.data,
                 fileName: file.name
+            }, {
+                responseType: 'arraybuffer',
+                timeout: 60000,
             });
+
+            const contentType = res.headers['content-type'] || '';
             
-            const url = res.data?.imageUrl || res.data?.image || res.data?.url || res.data?.output || res.data?.result;
-            if (url) {
-                setResultUrl(url);
-            } else if (typeof res.data === 'string' && res.data.startsWith('http')) {
-                setResultUrl(res.data);
+            if (contentType.includes('image') || res.data instanceof ArrayBuffer) {
+                // Binary image response → convert to data URL
+                const blob = new Blob([res.data], { type: contentType || 'image/png' });
+                const objectUrl = URL.createObjectURL(blob);
+                setResultUrl(objectUrl);
             } else {
-                setError('Unexpected response format. Please try again.');
+                // Try parsing as JSON (in case it's a JSON response with a URL)
+                const text = new TextDecoder().decode(res.data);
+                try {
+                    const json = JSON.parse(text);
+                    const url = json?.imageUrl || json?.image || json?.url || json?.output || json?.result;
+                    if (url && typeof url === 'string' && url.startsWith('http')) {
+                        setResultUrl(url);
+                    } else if (typeof json === 'string' && json.startsWith('data:image')) {
+                        setResultUrl(json);
+                    } else {
+                        setError('Unexpected response format.');
+                    }
+                } catch {
+                    // Maybe it's a base64 string
+                    if (text.startsWith('data:image')) {
+                        setResultUrl(text);
+                    } else if (text.startsWith('http')) {
+                        setResultUrl(text.trim());
+                    } else {
+                        setError('Unexpected response format.');
+                    }
+                }
             }
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || 'An error occurred removing the background.');
@@ -53,8 +78,19 @@ export default function BgRemover() {
         }
     };
 
+    // Cleanup object URL on unmount or new result
+    const handleDownload = () => {
+        if (!resultUrl) return;
+        const a = document.createElement('a');
+        a.href = resultUrl;
+        a.download = `no-bg-${file?.name || 'image'}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
     return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="pb-12 flex flex-col">
+        <div className="pb-12 flex flex-col">
             <div className="mb-6">
                 <h1 className="text-2xl sm:text-3xl font-extrabold flex items-center gap-3">
                     <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/20">
@@ -111,18 +147,17 @@ export default function BgRemover() {
                             </div>
                             
                             {error && (
-                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg flex items-start gap-2 text-xs">
+                                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg flex items-start gap-2 text-xs">
                                     <AlertCircle className="w-4 h-4 flex-shrink-0" />
                                     <p>{error}</p>
-                                </motion.div>
+                                </div>
                             )}
                         </div>
                     )}
                 </div>
 
                 {/* Result Area */}
-                <div className="glass-card rounded-2xl p-4 sm:p-6 flex flex-col space-y-4 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-[length:100px_100px] relative overflow-hidden">
-                    {/* Transparent grid background for result area so transparent PNGs show properly */}
+                <div className="glass-card rounded-2xl p-4 sm:p-6 flex flex-col space-y-4 relative overflow-hidden">
                     <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage: 'repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #fff 25%, #fff 75%, #000 75%, #000)', backgroundPosition: '0 0, 10px 10px', backgroundSize: '20px 20px'}}></div>
                     
                     <h2 className="text-sm font-semibold text-foreground/80 uppercase tracking-wider flex items-center gap-2 relative z-10">
@@ -131,41 +166,38 @@ export default function BgRemover() {
                     </h2>
                     
                     <div className="flex-1 flex items-center justify-center min-h-[300px] relative z-10">
-                        <AnimatePresence mode="wait">
-                            {loading ? (
-                                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4">
-                                    <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 shadow-xl shadow-cyan-500/10 animate-pulse">
-                                        <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
-                                    </div>
-                                    <p className="text-sm font-medium text-cyan-400 animate-pulse">AI is detecting subject...</p>
-                                </motion.div>
-                            ) : resultUrl ? (
-                                <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full flex-col flex items-center gap-4">
-                                    <div className="relative rounded-xl overflow-hidden shadow-2xl">
-                                        {/* Show checkered background behind the image so user knows it's transparent */}
-                                        <div className="absolute inset-0 z-0 bg-white" style={{backgroundImage: 'repeating-linear-gradient(45deg, #e5e7eb 25%, transparent 25%, transparent 75%, #e5e7eb 75%, #e5e7eb), repeating-linear-gradient(45deg, #e5e7eb 25%, #ffffff 25%, #ffffff 75%, #e5e7eb 75%, #e5e7eb)', backgroundPosition: '0 0, 10px 10px', backgroundSize: '20px 20px'}}></div>
-                                        <img src={resultUrl} alt="Background removed" className="max-w-full max-h-[400px] relative z-10 object-contain" />
-                                    </div>
-                                    <a 
-                                        href={resultUrl} download={`no-bg-${file?.name || 'image'}.png`} target="_blank" rel="noreferrer"
-                                        className="btn-primary w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-500"
-                                    >
-                                        <Download className="w-4 h-4" /> Download HD Image
-                                    </a>
-                                </motion.div>
-                            ) : (
-                                <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center text-foreground/40 text-center">
-                                    <div className="w-16 h-16 mb-4 rounded-full bg-background border border-border border-dashed flex items-center justify-center">
-                                        <Scissors className="w-6 h-6 text-foreground/30" />
-                                    </div>
-                                    <p className="text-sm font-medium">Remove Background</p>
-                                    <p className="text-xs mt-1 max-w-[200px]">Upload an image and click remove to see the magic</p>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        {loading ? (
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 shadow-xl shadow-cyan-500/10 animate-pulse">
+                                    <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+                                </div>
+                                <p className="text-sm font-medium text-cyan-400 animate-pulse">AI is detecting subject...</p>
+                            </div>
+                        ) : resultUrl ? (
+                            <div className="w-full flex-col flex items-center gap-4">
+                                <div className="relative rounded-xl overflow-hidden shadow-2xl">
+                                    <div className="absolute inset-0 z-0 bg-white" style={{backgroundImage: 'repeating-linear-gradient(45deg, #e5e7eb 25%, transparent 25%, transparent 75%, #e5e7eb 75%, #e5e7eb), repeating-linear-gradient(45deg, #e5e7eb 25%, #ffffff 25%, #ffffff 75%, #e5e7eb 75%, #e5e7eb)', backgroundPosition: '0 0, 10px 10px', backgroundSize: '20px 20px'}}></div>
+                                    <img src={resultUrl} alt="Background removed" className="max-w-full max-h-[400px] relative z-10 object-contain" />
+                                </div>
+                                <button 
+                                    onClick={handleDownload}
+                                    className="btn-primary w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-500"
+                                >
+                                    <Download className="w-4 h-4" /> Download HD Image
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center text-foreground/40 text-center">
+                                <div className="w-16 h-16 mb-4 rounded-full bg-background border border-border border-dashed flex items-center justify-center">
+                                    <Scissors className="w-6 h-6 text-foreground/30" />
+                                </div>
+                                <p className="text-sm font-medium">Remove Background</p>
+                                <p className="text-xs mt-1 max-w-[200px]">Upload an image and click remove to see the magic</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 }

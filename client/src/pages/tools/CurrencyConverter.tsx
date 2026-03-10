@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { DollarSign, ArrowRightLeft, Loader2, AlertCircle, Activity } from 'lucide-react';
 import axios from 'axios';
 
@@ -20,6 +19,49 @@ export default function CurrencyConverter() {
         setResult(null);
     };
 
+    // Deep extract a numeric value from any response shape
+    const extractResult = (data: any): string | null => {
+        if (data === null || data === undefined) return null;
+        
+        // If it's already a number or numeric string
+        if (typeof data === 'number') return data.toFixed(4);
+        if (typeof data === 'string') {
+            const num = parseFloat(data);
+            if (!isNaN(num)) return num.toFixed(4);
+            // Just return it if it's a non-empty string
+            if (data.trim()) return data;
+            return null;
+        }
+
+        // If it's an array, try the first element
+        if (Array.isArray(data)) {
+            if (data.length === 0) return null;
+            return extractResult(data[0]);
+        }
+
+        // If it's an object, try common keys
+        if (typeof data === 'object') {
+            const keys = ['result', 'converted', 'amount', 'output', 'value', 'convertedAmount', 'rate', 'conversion', 'data', 'response'];
+            for (const key of keys) {
+                if (data[key] !== undefined) {
+                    const val = extractResult(data[key]);
+                    if (val) return val;
+                }
+            }
+            // Try all keys
+            for (const key of Object.keys(data)) {
+                const val = data[key];
+                if (typeof val === 'number') return val.toFixed(4);
+                if (typeof val === 'string') {
+                    const num = parseFloat(val);
+                    if (!isNaN(num)) return num.toFixed(4);
+                }
+            }
+        }
+
+        return null;
+    };
+
     const handleConvert = async () => {
         if (!amount || isNaN(Number(amount))) return;
         setLoading(true);
@@ -33,11 +75,13 @@ export default function CurrencyConverter() {
                 to: toCurrency
             });
             
-            const converted = res.data?.result || res.data?.converted || res.data?.amount || res.data?.output || res.data;
+            const converted = extractResult(res.data);
             if (converted) {
-                setResult(String(converted));
+                setResult(converted);
             } else {
-                setError('Unexpected response format.');
+                // Fallback: show the raw response as a string
+                const raw = JSON.stringify(res.data);
+                setError(`Unexpected response: ${raw.substring(0, 200)}`);
             }
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || 'An error occurred converting currency.');
@@ -47,7 +91,7 @@ export default function CurrencyConverter() {
     };
 
     return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="pb-12 flex flex-col max-w-2xl mx-auto">
+        <div className="pb-12 flex flex-col max-w-2xl mx-auto">
             <div className="mb-6 text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20 flex items-center justify-center">
                     <Activity className="w-8 h-8 text-white" />
@@ -119,24 +163,22 @@ export default function CurrencyConverter() {
             </div>
 
             {error && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl flex items-start gap-3 text-sm mb-6 text-center">
+                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl flex items-start gap-3 text-sm mb-6 text-center">
                     <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                     <p>{error}</p>
-                </motion.div>
+                </div>
             )}
 
-            <AnimatePresence>
-                {result && !loading && (
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card rounded-2xl p-6 border-emerald-500/20 text-center">
-                        <p className="text-foreground/60 text-sm font-medium mb-1">
-                            {amount} {fromCurrency} equals
-                        </p>
-                        <h2 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 mb-2">
-                            {result} <span className="text-2xl">{toCurrency}</span>
-                        </h2>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </motion.div>
+            {result && !loading && (
+                <div className="glass-card rounded-2xl p-6 border-emerald-500/20 text-center">
+                    <p className="text-foreground/60 text-sm font-medium mb-1">
+                        {amount} {fromCurrency} equals
+                    </p>
+                    <h2 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 mb-2">
+                        {result} <span className="text-2xl">{toCurrency}</span>
+                    </h2>
+                </div>
+            )}
+        </div>
     );
 }

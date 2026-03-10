@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
     Image as ImageIcon, Video, Mic, Type, Youtube, MessageSquare, Music, User, Podcast,
@@ -142,15 +141,6 @@ const categories = [
     }
 ];
 
-const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.03 } }
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.25 } }
-};
 
 export default function Dashboard() {
     const { user } = useStore();
@@ -159,9 +149,7 @@ export default function Dashboard() {
     return (
         <div className="pb-8">
             {/* Welcome Hero */}
-            <motion.div
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
+            <div
                 className="glass-card rounded-3xl p-5 sm:p-8 mb-8 relative overflow-hidden"
             >
                 {/* Decorative */}
@@ -188,19 +176,15 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </div>
 
             {/* Categories */}
             <div className="space-y-8 sm:space-y-10">
                 {categories.map((category, idx) => (
-                    <motion.div 
+                    <div 
                         key={idx}
                         id={category.sectionId}
                         className="scroll-mt-20"
-                        variants={container}
-                        initial="hidden"
-                        whileInView="show"
-                        viewport={{ once: true, amount: 0.05 }}
                     >
                         {/* Category Header */}
                         <div className="flex items-center gap-3 mb-4 sm:mb-5">
@@ -222,7 +206,7 @@ export default function Dashboard() {
                         <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
                             {category.tools.map((tool, i) => (
                                 tool.active ? (
-                                    <motion.div key={i} variants={itemVariants}>
+                                    <div key={i}>
                                         <Link 
                                             to={tool.path}
                                             className="group flex items-center p-3 sm:p-3.5 rounded-2xl glass-card hover:border-brand-500/40 transition-all duration-200 overflow-hidden relative"
@@ -238,9 +222,9 @@ export default function Dashboard() {
                                             </div>
                                             <ArrowRight className="w-3.5 h-3.5 text-foreground/15 group-hover:text-brand-500 transition-all opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 shrink-0" />
                                         </Link>
-                                    </motion.div>
+                                    </div>
                                 ) : (
-                                    <motion.div key={i} variants={itemVariants}>
+                                    <div key={i}>
                                         <div className="flex items-center p-3 sm:p-3.5 rounded-2xl border border-border/30 opacity-50 cursor-not-allowed">
                                             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-muted flex items-center justify-center mr-3 shrink-0">
                                                 <tool.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
@@ -250,11 +234,11 @@ export default function Dashboard() {
                                                 <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Coming Soon</span>
                                             </div>
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 )
                             ))}
                         </div>
-                    </motion.div>
+                    </div>
                 ))}
             </div>
         </div>
