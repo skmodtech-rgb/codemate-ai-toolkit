@@ -10,8 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "@tensorflow/tfjs": "^4.11.0",
     "autoprefixer": "^10.4.27",
     "axios": "^1.13.6",
+    "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
     "docx": "^9.6.1",
@@ -27,9 +32,11 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.6.0",
+    "react-image-crop": "^11.0.10",
     "react-router-dom": "^7.13.1",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^3.4.19",
+    "upscaler": "^1.0.0-beta.19",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

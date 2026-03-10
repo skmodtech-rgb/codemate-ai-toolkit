@@ -20,6 +20,15 @@ import TextToSpeech from './pages/tools/TextToSpeech';
 import SpeechToText from './pages/tools/SpeechToText';
 import YoutubeTranscriber from './pages/tools/YoutubeTranscriber';
 import CurrencyConverter from './pages/tools/CurrencyConverter';
+import ImageCompressor from './pages/tools/ImageCompressor';
+import ImageResizer from './pages/tools/ImageResizer';
+import ImageCropper from './pages/tools/ImageCropper';
+import FormatConverter from './pages/tools/FormatConverter';
+import ImageUpscaler from './pages/tools/ImageUpscaler';
+import VideoToGif from './pages/tools/VideoToGif';
+import GifToVideo from './pages/tools/GifToVideo';
+import ScreenRecorder from './pages/tools/ScreenRecorder';
+import WebcamRecorder from './pages/tools/WebcamRecorder';
 import JsonFormatter from './pages/tools/JsonFormatter';
 import JsonToCsv from './pages/tools/JsonToCsv';
 import CsvToJson from './pages/tools/CsvToJson';
@@ -81,6 +90,17 @@ function App() {
                     <Route path="speech-to-text" element={<SpeechToText />} />
                     <Route path="youtube-transcriber" element={<YoutubeTranscriber />} />
                     <Route path="currency-converter" element={<CurrencyConverter />} />
+
+                    {/* Media Studio */}
+                    <Route path="image-compressor" element={<ImageCompressor />} />
+                    <Route path="image-resizer" element={<ImageResizer />} />
+                    <Route path="image-cropper" element={<ImageCropper />} />
+                    <Route path="format-converter" element={<FormatConverter />} />
+                    <Route path="image-upscaler" element={<ImageUpscaler />} />
+                    <Route path="video-to-gif" element={<VideoToGif />} />
+                    <Route path="gif-to-video" element={<GifToVideo />} />
+                    <Route path="screen-recorder" element={<ScreenRecorder />} />
+                    <Route path="webcam-recorder" element={<WebcamRecorder />} />
 
                     {/* Document Workshop */}
                     <Route path="pdf-to-word" element={<PdfToWord />} />
