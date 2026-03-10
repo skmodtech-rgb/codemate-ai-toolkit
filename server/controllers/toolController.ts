@@ -132,7 +132,7 @@ export const removeBackground = async (req: Request, res: Response) => {
 export const n8nProxy = async (req: Request, res: Response) => {
     const { action } = req.params;
     try {
-        const endpoint = `https://cmpunktg6.app.n8n.cloud/webhook/${action}`;
+        const endpoint = `https://cmpunktg7.app.n8n.cloud/webhook/${action}`;
         
         const response = await axios.post(endpoint, req.body, {
             timeout: 120000,
