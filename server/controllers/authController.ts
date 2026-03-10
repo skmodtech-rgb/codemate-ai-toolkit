@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
 import generateToken from '../utils/generateToken';
+import { generateVerificationToken, sendVerificationEmail } from '../utils/emailService';
 
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
@@ -9,14 +10,14 @@ export const authUser = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
 
-        // since we might not have a working mongo instance initially for the demo, 
-        // we can add a fallback mock login to allow UI to show
+        // Mock login fallback for demo
         if (process.env.MONGODB_URI === 'YOUR_MONGO_DB_URL' || !process.env.MONGODB_URI) {
             if (email === 'demo@toolmate.ai' && password === 'demo123') {
                 return res.json({
                     _id: 'mock_id_123',
                     name: 'Demo User',
                     email: 'demo@toolmate.ai',
+                    isEmailVerified: true,
                     token: generateToken('mock_id_123'),
                 });
             }
@@ -29,6 +30,7 @@ export const authUser = async (req: Request, res: Response) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                isEmailVerified: user.isEmailVerified,
                 token: generateToken(user._id),
             });
         } else {
@@ -40,41 +42,54 @@ export const authUser = async (req: Request, res: Response) => {
     }
 };
 
-// @desc    Register a new user
+// @desc    Register a new user (sends verification email)
 // @route   POST /api/auth/register
 // @access  Public
 export const registerUser = async (req: Request, res: Response) => {
     try {
         const { name, email, password } = req.body;
 
-        // Mock DB implementation for seamless demo
+        // Mock DB for demo
         if (process.env.MONGODB_URI === 'YOUR_MONGO_DB_URL' || !process.env.MONGODB_URI) {
-             return res.status(201).json({
+            return res.status(201).json({
                 _id: 'mock_new_id',
                 name,
                 email,
+                isEmailVerified: false,
+                verificationSent: true,
                 token: generateToken('mock_new_id'),
             });
         }
 
         const userExists = await User.findOne({ email });
-
         if (userExists) {
             res.status(400);
             throw new Error('User already exists');
         }
 
+        // Generate email verification token
+        const verificationToken = generateVerificationToken();
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
         const user = await User.create({
             name,
             email,
             password,
+            isEmailVerified: false,
+            emailVerificationToken: verificationToken,
+            emailVerificationExpires: verificationExpires,
         });
 
         if (user) {
+            // Send verification email
+            await sendVerificationEmail(email, verificationToken);
+
             res.status(201).json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                isEmailVerified: false,
+                verificationSent: true,
                 token: generateToken(user._id),
             });
         } else {
@@ -83,6 +98,67 @@ export const registerUser = async (req: Request, res: Response) => {
         }
     } catch (error: any) {
         res.status(400).json({ message: error.message || 'Error occurred' });
+    }
+};
+
+// @desc    Verify email with token
+// @route   GET /api/auth/verify-email/:token
+// @access  Public
+export const verifyEmail = async (req: Request, res: Response) => {
+    try {
+        const { token } = req.params;
+
+        // Mock mode
+        if (process.env.MONGODB_URI === 'YOUR_MONGO_DB_URL' || !process.env.MONGODB_URI) {
+            return res.json({ message: 'Email verified successfully', verified: true });
+        }
+
+        const user = await User.findOne({
+            emailVerificationToken: token,
+            emailVerificationExpires: { $gt: new Date() },
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired verification link' });
+        }
+
+        user.isEmailVerified = true;
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpires = undefined;
+        await user.save();
+
+        res.json({ message: 'Email verified successfully', verified: true });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Verification failed' });
+    }
+};
+
+// @desc    Resend verification email
+// @route   POST /api/auth/resend-verification
+// @access  Private
+export const resendVerification = async (req: any, res: Response) => {
+    try {
+        if (process.env.MONGODB_URI === 'YOUR_MONGO_DB_URL' || !process.env.MONGODB_URI) {
+            return res.json({ message: 'Verification email sent', sent: true });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (user.isEmailVerified) {
+            return res.status(400).json({ message: 'Email already verified' });
+        }
+
+        const token = generateVerificationToken();
+        user.emailVerificationToken = token;
+        user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await user.save();
+
+        await sendVerificationEmail(user.email, token);
+        res.json({ message: 'Verification email sent', sent: true });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Failed to send email' });
     }
 };
 
@@ -96,22 +172,86 @@ export const getUserProfile = async (req: any, res: Response) => {
                 _id: 'mock_id_123',
                 name: 'Demo User',
                 email: 'demo@toolmate.ai',
+                isEmailVerified: true,
             });
         }
 
         const user = await User.findById(req.user._id);
-
         if (user) {
             res.json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                isEmailVerified: user.isEmailVerified,
             });
         } else {
             res.status(404);
             throw new Error('User not found');
         }
-    } catch(error: any) {
+    } catch (error: any) {
         res.status(404).json({ message: error.message || 'Error occurred' });
+    }
+};
+
+// @desc    Update user profile (name)
+// @route   PUT /api/auth/profile
+// @access  Private
+export const updateUserProfile = async (req: any, res: Response) => {
+    try {
+        if (process.env.MONGODB_URI === 'YOUR_MONGO_DB_URL' || !process.env.MONGODB_URI) {
+            return res.json({
+                _id: 'mock_id_123',
+                name: req.body.name || 'Demo User',
+                email: 'demo@toolmate.ai',
+                isEmailVerified: true,
+            });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.name = req.body.name || user.name;
+        const updatedUser = await user.save();
+
+        res.json({
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            isEmailVerified: updatedUser.isEmailVerified,
+        });
+    } catch (error: any) {
+        res.status(400).json({ message: error.message || 'Update failed' });
+    }
+};
+
+// @desc    Change user password
+// @route   PUT /api/auth/change-password
+// @access  Private
+export const changePassword = async (req: any, res: Response) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (process.env.MONGODB_URI === 'YOUR_MONGO_DB_URL' || !process.env.MONGODB_URI) {
+            return res.json({ message: 'Password updated successfully' });
+        }
+
+        const user: any = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const isMatch = await user.matchPassword(currentPassword);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Current password is incorrect' });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error: any) {
+        res.status(400).json({ message: error.message || 'Password change failed' });
     }
 };

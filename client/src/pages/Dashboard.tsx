@@ -7,13 +7,14 @@ import {
     Database, Code, ListTree, QrCode, Scan, Palette, GitCompare, LayoutGrid, 
     Binary, Key, CheckSquare, AlignLeft, Paintbrush,
     Hourglass, Activity, Clock, Scale, PenTool,
-    Hash, CalendarDays, BarChart, TrendingUp, Zap, ArrowRight, Share2, TerminalSquare, Settings, LayoutDashboard,
+    Hash, CalendarDays, BarChart, TrendingUp, Zap, ArrowRight, Share2, TerminalSquare, Settings,
     ShieldCheck
 } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 const categories = [
     {
-        title: "AI CREATOR STUDIO",
+        title: "AI Creator Studio",
         description: "Content Creation Superpowers",
         color: "from-brand-500 to-brand-400",
         icon: Paintbrush,
@@ -31,7 +32,7 @@ const categories = [
         ]
     },
     {
-        title: "DOCUMENT WORKSHOP",
+        title: "Document Workshop",
         description: "PDF & Document Magic",
         color: "from-brand-600 to-brand-500",
         icon: FileText,
@@ -49,7 +50,7 @@ const categories = [
         ]
     },
     {
-        title: "MEDIA STUDIO",
+        title: "Media Studio",
         description: "Image & Video Wizardry",
         color: "from-brand-400 to-brand-300",
         icon: MonitorPlay,
@@ -68,7 +69,7 @@ const categories = [
         ]
     },
     {
-        title: "DATA INTELLIGENCE",
+        title: "Data Intelligence",
         description: "Transform Data into Insights",
         color: "from-brand-500 to-brand-400",
         icon: Database,
@@ -86,7 +87,7 @@ const categories = [
         ]
     },
     {
-        title: "DEVELOPER TOOLKIT",
+        title: "Developer Toolkit",
         description: "For Coders & Engineers",
         color: "from-brand-600 to-brand-500",
         icon: TerminalSquare,
@@ -104,7 +105,7 @@ const categories = [
         ]
     },
     {
-        title: "UTILITY HUB",
+        title: "Utility Hub",
         description: "Everyday Essential Tools",
         color: "from-brand-400 to-brand-300",
         icon: Settings,
@@ -122,7 +123,7 @@ const categories = [
         ]
     },
     {
-        title: "CONTENT CREATOR SUITE",
+        title: "Content Creator Suite",
         description: "Social Media & Marketing",
         color: "from-brand-500 to-brand-400",
         icon: Share2,
@@ -141,111 +142,112 @@ const categories = [
     }
 ];
 
-const getEmoji = (title: string) => {
-    if (title.includes('AI')) return '🎨';
-    if (title.includes('DOCUMENT')) return '📄';
-    if (title.includes('MEDIA')) return '🎬';
-    if (title.includes('DATA')) return '📊';
-    if (title.includes('DEVELOPER')) return '🔧';
-    if (title.includes('UTILITY')) return '⚙️';
-    return '📱';
-};
-
 const container = {
     hidden: { opacity: 0 },
-    show: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.05
-        }
-    }
+    show: { opacity: 1, transition: { staggerChildren: 0.03 } }
 };
 
 const itemVariants = {
-    hidden: { opacity: 0, scale: 0.95, y: 15 },
-    show: { opacity: 1, scale: 1, y: 0 }
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.25 } }
 };
 
 export default function Dashboard() {
+    const { user } = useStore();
+    const activeToolCount = categories.reduce((sum, c) => sum + c.tools.filter(t => t.active).length, 0);
+
     return (
-        <div className="pb-12">
-            {/* Header */}
-            <div className="mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground mb-2 flex items-center gap-3">
-                        <LayoutDashboard className="w-7 h-7 sm:w-8 sm:h-8 text-brand-500" />
-                        Explore Toolkit
-                    </h1>
-                    <p className="text-muted-foreground max-w-2xl text-sm sm:text-base">
-                        Access all premium AI tools, media converters, and developer utilities organized into tailored categories.
-                    </p>
+        <div className="pb-8">
+            {/* Welcome Hero */}
+            <motion.div
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="glass-card rounded-3xl p-5 sm:p-8 mb-8 relative overflow-hidden"
+            >
+                {/* Decorative */}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-brand-500/10 to-transparent rounded-bl-full pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-brand-400/5 to-transparent rounded-tr-full pointer-events-none" />
+
+                <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground mb-1.5">
+                            Welcome back, <span className="text-gradient">{user?.name?.split(' ')[0] || 'User'}</span>
+                        </h1>
+                        <p className="text-muted-foreground text-sm sm:text-base max-w-xl">
+                            Your all-in-one AI toolkit is ready. Choose from {activeToolCount}+ active tools below to get started.
+                        </p>
+                    </div>
+                    <div className="flex gap-3 shrink-0">
+                        <div className="glass-card rounded-2xl px-4 py-3 text-center min-w-[80px]">
+                            <p className="text-xl sm:text-2xl font-extrabold text-gradient">{activeToolCount}+</p>
+                            <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">Tools</p>
+                        </div>
+                        <div className="glass-card rounded-2xl px-4 py-3 text-center min-w-[80px]">
+                            <p className="text-xl sm:text-2xl font-extrabold text-gradient">{categories.length}</p>
+                            <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">Categories</p>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full glass-card text-brand-500 text-xs font-semibold uppercase tracking-wider">
-                        <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-                        System Online
-                    </span>
-                </div>
-            </div>
+            </motion.div>
 
             {/* Categories */}
-            <div className="space-y-10 sm:space-y-12">
+            <div className="space-y-8 sm:space-y-10">
                 {categories.map((category, idx) => (
                     <motion.div 
                         key={idx}
                         id={category.sectionId}
-                        className="scroll-mt-24"
+                        className="scroll-mt-20"
                         variants={container}
                         initial="hidden"
                         whileInView="show"
-                        viewport={{ once: true, amount: 0.1 }}
+                        viewport={{ once: true, amount: 0.05 }}
                     >
                         {/* Category Header */}
-                        <div className="flex items-center gap-3 border-b border-border pb-3 sm:pb-4 mb-4 sm:mb-6">
-                            <div className={`p-2 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-lg flex-shrink-0`}>
-                                <category.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        <div className="flex items-center gap-3 mb-4 sm:mb-5">
+                            <div className={`p-2 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-lg shrink-0`}>
+                                <category.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             </div>
                             <div className="min-w-0">
-                                <h2 className="text-lg sm:text-2xl font-bold text-foreground flex items-center gap-2 truncate">
-                                    <span className="truncate">{category.title}</span>
-                                    <span>{getEmoji(category.title)}</span>
-                                </h2>
-                                <p className="text-xs sm:text-sm font-medium text-foreground/50 truncate">{category.description}</p>
+                                <h2 className="text-base sm:text-xl font-bold text-foreground truncate">{category.title}</h2>
+                                <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">{category.description}</p>
+                            </div>
+                            <div className="ml-auto shrink-0">
+                                <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground glass-card px-2.5 py-1 rounded-full">
+                                    {category.tools.filter(t => t.active).length} tools
+                                </span>
                             </div>
                         </div>
 
                         {/* Tool Cards Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
                             {category.tools.map((tool, i) => (
                                 tool.active ? (
                                     <motion.div key={i} variants={itemVariants}>
                                         <Link 
                                             to={tool.path}
-                                            className="group flex items-center p-3 sm:p-4 rounded-xl glass-card hover:border-brand-500/50 hover:shadow-brand-500/10 transition-all duration-300 overflow-hidden relative"
+                                            className="group flex items-center p-3 sm:p-3.5 rounded-2xl glass-card hover:border-brand-500/40 transition-all duration-200 overflow-hidden relative"
                                         >
-                                            <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 bg-gradient-to-br ${category.color} transition-opacity duration-500`}></div>
-                                            <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br ${category.color} flex items-center justify-center mr-3 sm:mr-4 group-hover:scale-110 transition-transform flex-shrink-0`}>
-                                                <tool.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                                            <div className={`absolute inset-0 opacity-0 group-hover:opacity-[0.06] bg-gradient-to-br ${category.color} transition-opacity duration-300`} />
+                                            <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mr-3 group-hover:scale-105 transition-transform duration-200 shrink-0`}>
+                                                <tool.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="text-xs sm:text-sm font-bold text-foreground truncate group-hover:text-brand-400 transition-colors">
+                                                <h3 className="text-xs sm:text-sm font-semibold text-foreground truncate group-hover:text-brand-500 transition-colors">
                                                     {tool.name}
                                                 </h3>
                                             </div>
-                                            <ArrowRight className="w-4 h-4 text-foreground/20 group-hover:text-brand-500 transition-all opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 flex-shrink-0" />
+                                            <ArrowRight className="w-3.5 h-3.5 text-foreground/15 group-hover:text-brand-500 transition-all opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 shrink-0" />
                                         </Link>
                                     </motion.div>
                                 ) : (
                                     <motion.div key={i} variants={itemVariants}>
-                                        <div className="group flex items-center p-3 sm:p-4 rounded-xl border border-border/50 bg-background/30 opacity-60 cursor-not-allowed">
-                                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-500/20 flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-                                                <tool.icon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                                        <div className="flex items-center p-3 sm:p-3.5 rounded-2xl border border-border/30 opacity-50 cursor-not-allowed">
+                                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-muted flex items-center justify-center mr-3 shrink-0">
+                                                <tool.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="text-xs sm:text-sm font-semibold text-gray-500 truncate">
-                                                    {tool.name}
-                                                </h3>
-                                                <span className="text-[10px] uppercase font-bold text-gray-600 tracking-wider">Coming Soon</span>
+                                                <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground truncate">{tool.name}</h3>
+                                                <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Coming Soon</span>
                                             </div>
                                         </div>
                                     </motion.div>

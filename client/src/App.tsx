@@ -66,6 +66,7 @@ import SqlFormatter from './pages/tools/SqlFormatter';
 import GenericTool from './pages/tools/GenericTool';
 import Profile from './pages/tools/Profile';
 import ChangePassword from './pages/tools/ChangePassword';
+import VerifyEmail from './pages/VerifyEmail';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -93,6 +94,7 @@ function App() {
                 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
 
                 {/* Secure App / Dashboard Routes */}
                 <Route path="/app" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
