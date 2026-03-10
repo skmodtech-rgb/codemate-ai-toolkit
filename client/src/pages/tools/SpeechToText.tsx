@@ -42,7 +42,7 @@ export default function SpeechToText() {
                 ? { audio: file!.data, fileName: file!.name }
                 : { url };
 
-            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const token = JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token;
             const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/transcribe-audio`, payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });

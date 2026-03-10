@@ -16,7 +16,7 @@ export default function WebScraper() {
 
         try {
             // Integration with n8n Webhook via our backend proxy
-            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const token = JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token;
             const webhookUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/web-scraper`;
             const response = await fetch(webhookUrl, {
                 method: 'POST',

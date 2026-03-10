@@ -23,7 +23,7 @@ export default function ImageGenerator() {
         setResultUrl(null);
 
         try {
-            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const token = JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token;
             const res = await axios.post(ENDPOINTS[model], { prompt }, {
                 headers: { Authorization: `Bearer ${token}` }
             });

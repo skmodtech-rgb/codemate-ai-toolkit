@@ -37,7 +37,7 @@ export default function BgRemover() {
                 fileName: file.name
             }, {
                 headers: {
-                    Authorization: `Bearer ${JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token}`
+                    Authorization: `Bearer ${JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token}`
                 },
                 responseType: 'arraybuffer',
                 timeout: 60000,

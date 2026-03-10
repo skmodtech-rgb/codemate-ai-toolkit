@@ -37,7 +37,7 @@ export default function Chatbot() {
         setLoading(true);
 
         try {
-            const token = JSON.parse(localStorage.getItem('toolmate-auth-store') || '{}')?.state?.user?.token;
+            const token = JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token;
             const apiMessages = [...messages, newUserMessage].map(m => ({ role: m.role, content: m.content }));
             const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/ai-chat`, 
                 { messages: apiMessages, provider, model },
