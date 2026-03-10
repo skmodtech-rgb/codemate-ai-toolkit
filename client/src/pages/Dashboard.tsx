@@ -112,13 +112,13 @@ const categories = [
         tools: [
             { name: 'Currency Converter', path: '/app/currency-converter', icon: Activity, active: true },
             { name: 'Password Generator', path: '/app/password-generator', icon: Key, active: true },
-            { name: 'Password Strength', path: '/app/password-strength', icon: ShieldCheck, active: false },
-            { name: 'Unit Converter', path: '/app/unit-converter', icon: Scale, active: false },
-            { name: 'Age Calculator', path: '/app/age-calculator', icon: Hourglass, active: false },
+            { name: 'Password Strength', path: '/app/password-strength', icon: ShieldCheck, active: true },
+            { name: 'Unit Converter', path: '/app/unit-converter', icon: Scale, active: true },
+            { name: 'Age Calculator', path: '/app/age-calculator', icon: Hourglass, active: true },
             { name: 'Word Counter', path: '/app/word-counter', icon: Type, active: true },
             { name: 'Lorem Ipsum Generator', path: '/app/lorem-ipsum', icon: AlignLeft, active: true },
-            { name: 'World Clock', path: '/app/world-clock', icon: Clock, active: false },
-            { name: 'BMI Calculator', path: '/app/bmi-calculator', icon: Scale, active: false },
+            { name: 'World Clock', path: '/app/world-clock', icon: Clock, active: true },
+            { name: 'BMI Calculator', path: '/app/bmi-calculator', icon: Scale, active: true },
         ]
     },
     {

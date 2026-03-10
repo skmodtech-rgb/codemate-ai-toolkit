@@ -29,14 +29,20 @@ import VideoToGif from './pages/tools/VideoToGif';
 import GifToVideo from './pages/tools/GifToVideo';
 import ScreenRecorder from './pages/tools/ScreenRecorder';
 import WebcamRecorder from './pages/tools/WebcamRecorder';
+import PasswordGenerator from './pages/tools/PasswordGenerator';
+import PasswordStrength from './pages/tools/PasswordStrength';
+import UnitConverter from './pages/tools/UnitConverter';
+import AgeCalculator from './pages/tools/AgeCalculator';
+import WordCounter from './pages/tools/WordCounter';
+import LoremGenerator from './pages/tools/LoremGenerator';
+import WorldClock from './pages/tools/WorldClock';
+import BmiCalculator from './pages/tools/BmiCalculator';
 import JsonFormatter from './pages/tools/JsonFormatter';
 import JsonToCsv from './pages/tools/JsonToCsv';
 import CsvToJson from './pages/tools/CsvToJson';
 import HashGenerator from './pages/tools/HashGenerator';
 import Base64Encoder from './pages/tools/Base64Encoder';
-import PasswordGenerator from './pages/tools/PasswordGenerator';
 import QrGenerator from './pages/tools/QrGenerator';
-import WordCounter from './pages/tools/WordCounter';
 import LoremIpsum from './pages/tools/LoremIpsum';
 // Document Workshop Tools
 import PdfMerger from './pages/tools/PdfMerger';
@@ -117,13 +123,20 @@ function App() {
                     <Route path="csv-to-json" element={<CsvToJson />} />
                     <Route path="qr-generator" element={<QrGenerator />} />
 
+                    {/* Utility Hub */}
+                    <Route path="password-generator" element={<PasswordGenerator />} />
+                    <Route path="password-strength" element={<PasswordStrength />} />
+                    <Route path="unit-converter" element={<UnitConverter />} />
+                    <Route path="age-calculator" element={<AgeCalculator />} />
+                    <Route path="word-counter" element={<WordCounter />} />
+                    <Route path="lorem-ipsum" element={<LoremGenerator />} />
+                    <Route path="world-clock" element={<WorldClock />} />
+                    <Route path="bmi-calculator" element={<BmiCalculator />} />
+
                     {/* Developer Tools */}
                     <Route path="base64" element={<Base64Encoder />} />
                     <Route path="hash-generator" element={<HashGenerator />} />
 
-                    {/* Utility Tools */}
-                    <Route path="password-generator" element={<PasswordGenerator />} />
-                    <Route path="word-counter" element={<WordCounter />} />
                     <Route path="lorem-ipsum" element={<LoremIpsum />} />
 
                     <Route path="*" element={<GenericTool />} />
