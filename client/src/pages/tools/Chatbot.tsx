@@ -3,6 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Send, Bot, User as UserIcon, Loader2, Sparkles, PlusCircle } from 'lucide-react';
 import axios from 'axios';
 
+const PROVIDERS = [
+    { name: 'Open AI Chat Gpt', id: 'OpenAI' },
+    { name: 'Anthropic (Claude)', id: 'Anthropic' },
+    { name: 'Google (Gemini)', id: 'Google' },
+    { name: 'xAI (Grok)', id: 'xAI' },
+    { name: 'Perplexity', id: 'Perplexity' }
+];
+
+const MODELS: Record<string, string[]> = {
+    'OpenAI': ['openai/o3', 'openai/gpt-5.1-instant'],
+    'Anthropic': ['anthropic/claude-opus-4.1', 'anthropic/claude-sonnet-4.5'],
+    'Google': ['google/gemini-3-pro-preview', 'google/gemini-2.5-pro'],
+    'xAI': ['xai/grok-4'],
+    'Perplexity': ['perplexity/sonar-pro']
+};
+
 interface Message {
     id: string;
     role: 'user' | 'assistant';
@@ -15,15 +31,7 @@ export default function Chatbot() {
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-    const MODELS: Record<string, string[]> = {
-        'Open AI Chat Gpt': ['openai/o3', 'openai/gpt-5.1-instant'],
-        'Anthropic(claude)': ['anthropic/claude-opus-4.1', 'anthropic/claude-sonnet-4.5'],
-        'Google(Gemini)': ['google/gemini-3-pro-preview', 'google/gemini-2.5-pro'],
-        'xAI(Grok)': ['xai/grok-4'],
-        'Perplexity': ['perplexity/sonar-pro']
-    };
-
-    const [provider, setProvider] = useState('Open AI Chat Gpt');
+    const [provider, setProvider] = useState('OpenAI');
     const [model, setModel] = useState('openai/o3');
     
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -55,12 +63,29 @@ export default function Chatbot() {
                 }
             );
 
-            if (res.data.success) {
+            let replyText = '';
+            const responseData = Array.isArray(res.data) ? res.data[0] : res.data;
+            
+            if (responseData?.data?.choices?.[0]?.message?.content) {
+                replyText = responseData.data.choices[0].message.content;
+            } else if (responseData?.choices?.[0]?.message?.content) {
+                replyText = responseData.choices[0].message.content;
+            } else if (responseData?.reply) {
+                replyText = responseData.reply;
+            } else if (typeof responseData === 'string') {
+                replyText = responseData;
+            } else if (responseData) {
+                replyText = JSON.stringify(responseData, null, 2);
+            }
+
+            if (replyText) {
                 setMessages(prev => [...prev, {
                     id: Date.now().toString() + 'bot',
                     role: 'assistant',
-                    content: res.data.reply
+                    content: replyText
                 }]);
+            } else {
+                throw new Error("Invalid response format");
             }
         } catch (error) {
             setMessages(prev => [...prev, {
@@ -103,12 +128,14 @@ export default function Chatbot() {
                         onChange={(e) => {
                             const newProvider = e.target.value;
                             setProvider(newProvider);
-                            setModel(MODELS[newProvider][0]);
+                            if (MODELS[newProvider] && MODELS[newProvider].length > 0) {
+                                setModel(MODELS[newProvider][0]);
+                            }
                         }}
                         className="bg-background text-sm font-medium rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-sm border border-transparent hover:border-border transition-colors cursor-pointer"
                     >
-                        {Object.keys(MODELS).map(p => (
-                            <option key={p} value={p}>{p}</option>
+                        {PROVIDERS.map(p => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
                         ))}
                     </select>
 
@@ -117,7 +144,7 @@ export default function Chatbot() {
                         onChange={(e) => setModel(e.target.value)}
                         className="bg-background text-sm text-foreground/70 rounded-lg px-3 py-1.5 focus:outline-none border border-transparent shadow-sm hover:border-border transition-colors cursor-pointer"
                     >
-                        {MODELS[provider].map(m => (
+                        {MODELS[provider]?.map(m => (
                             <option key={m} value={m}>{m}</option>
                         ))}
                     </select>
