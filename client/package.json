@@ -30,6 +30,7 @@
     "docx": "^9.6.1",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.35.2",
+    "js-beautify": "^1.15.4",
     "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.0",
     "jsqr": "^1.4.0",
