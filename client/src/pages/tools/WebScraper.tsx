@@ -14,6 +14,7 @@ export default function WebScraper() {
         setError(null);
         setResult(null);
 
+        try {
             // Integration with n8n Webhook via our backend proxy
             const token = JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token;
             const webhookUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/scrape-instagram`;
