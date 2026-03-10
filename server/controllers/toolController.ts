@@ -149,19 +149,21 @@ export const n8nProxy = async (req: Request, res: Response) => {
             // Graceful fallback for demo/judges if the n8n webhook is not registered or fails
             const act = String(action).toLowerCase();
             if (act.includes('image')) {
-                return res.json({ success: true, imageUrl: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&q=80', message: 'Mock image' });
+                const query = req.body.prompt ? encodeURIComponent(req.body.prompt) : 'amazing';
+                return res.json({ success: true, imageUrl: `https://image.pollinations.ai/prompt/${query}`, message: 'Generated via external Fallback API' });
             }
             if (act.includes('video')) {
                 return res.json({ success: true, videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4', message: 'Mock video' });
             }
             if (act.includes('chat')) {
-                return res.json({ success: true, reply: "Hello! I am a simulated ToolMate AI response since the N8N webhook is inactive. The connection works perfectly!" });
+                const lastMsg = req.body.messages && req.body.messages.length > 0 ? req.body.messages[req.body.messages.length - 1].content : '';
+                return res.json({ success: true, reply: `I am currently operating in fallback mode because the N8N webhook was deactivated. But I received your message: "${lastMsg}"` });
             }
             if (act.includes('speech')) {
                 return res.json({ success: true, audioUrl: 'https://www.w3schools.com/html/horse.mp3', message: 'Mock audio' });
             }
             if (act.includes('transcribe')) {
-                return res.json({ success: true, transcript: "This is a simulated AI transcription. The audio was processed, but the backend N8N webhook is currently unconfigured." });
+                return res.json({ success: true, transcript: "This is a simulated AI transcription. The audio was processed, but the backend N8N workflow is currently inactive." });
             }
             if (act.includes('currency')) {
                 return res.json({ success: true, result: (req.body.amount || 1) * 1.05, amount: (req.body.amount || 1) * 1.05 });
