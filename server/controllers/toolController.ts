@@ -147,7 +147,7 @@ export const n8nProxy = async (req: Request, res: Response) => {
 
         if (isUnavailable) {
             // Graceful fallback for demo/judges if the n8n webhook is not registered or fails
-            const act = action.toLowerCase();
+            const act = String(action).toLowerCase();
             if (act.includes('image')) {
                 return res.json({ success: true, imageUrl: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&q=80', message: 'Mock image' });
             }
