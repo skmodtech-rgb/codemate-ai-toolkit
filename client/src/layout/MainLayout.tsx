@@ -13,7 +13,7 @@ import {
     CheckSquare, Paintbrush, Zap, Activity, Scale, AlignLeft, Clock,
     Hourglass, ShieldCheck, ExternalLink
 } from 'lucide-react';
-import { TbApiApp } from "react-icons/tb";
+import { TbHexagonLetterT } from "react-icons/tb";
 
 // Full tool list per category
 const sidebarCategories = [
@@ -157,15 +157,15 @@ export default function MainLayout() {
                 {/* Logo */}
                 <div className="flex h-14 items-center px-4 justify-between shrink-0 border-b border-border/30">
                     {isOpen ? (
-                        <Link to="/app" className="flex items-center gap-2.5" onClick={handleNavClick}>
-                            <div className="p-1.5 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 shadow-md shadow-brand-500/20">
-                                <TbApiApp className="w-5 h-5 text-white" />
+                        <Link to="/app" className="flex items-center gap-2.5 group" onClick={handleNavClick}>
+                            <div className="p-1.5 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 shadow-md shadow-brand-500/20 group-hover:shadow-brand-500/40 transition-shadow">
+                                <TbHexagonLetterT className="w-5 h-5 text-white" />
                             </div>
-                            <span className="font-bold text-lg tracking-tight text-foreground">ToolMate</span>
+                            <span className="font-extrabold text-lg tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-brand-400">ToolMate</span>
                         </Link>
                     ) : (
                         <button onClick={toggleSidebar} className="mx-auto p-1.5 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 shadow-md shadow-brand-500/20 hover:shadow-brand-500/40 transition-shadow" title="Expand sidebar">
-                            <TbApiApp className="w-5 h-5 text-white" />
+                            <TbHexagonLetterT className="w-5 h-5 text-white" />
                         </button>
                     )}
                     {mobile && (
@@ -314,10 +314,10 @@ export default function MainLayout() {
                             <Menu className="w-5 h-5 text-foreground" />
                         </button>
                         <div className="flex items-center gap-2 lg:hidden shrink-0">
-                            <div className="p-1 rounded-lg bg-gradient-to-tr from-brand-600 to-brand-400">
-                                <TbApiApp className="w-4 h-4 text-white" />
+                            <div className="p-1 rounded-lg bg-gradient-to-tr from-brand-600 to-brand-400 shadow-sm">
+                                <TbHexagonLetterT className="w-4 h-4 text-white" />
                             </div>
-                            <span className="font-bold text-sm tracking-tight text-foreground">ToolMate</span>
+                            <span className="font-extrabold text-sm tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-brand-400">ToolMate</span>
                         </div>
 
                         {/* Search */}
