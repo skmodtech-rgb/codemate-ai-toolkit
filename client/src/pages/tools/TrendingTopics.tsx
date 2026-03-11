@@ -1,118 +1,185 @@
-import { TrendingUp, Flame, Globe, Zap, Hash, MessageSquare } from 'lucide-react';
+import { useState } from 'react';
+import { Instagram, Send, Loader2, MessageSquare, Heart, ExternalLink, Calendar, Hash, Flame } from 'lucide-react';
+import axios from 'axios';
 import { cn } from '../../utils/cn';
 
-export default function TrendingTopics() {
-    const categories = [
-        { id: 'all', label: 'All Categories', icon: Globe },
-        { id: 'tech', label: 'Technology', icon: Zap },
-        { id: 'business', label: 'Business & SaaS', icon: Flame },
-        { id: 'marketing', label: 'Marketing', icon: TrendingUp },
-    ];
+interface Post {
+    displayUrl: string;
+    caption: string;
+    likesCount: number;
+    commentsCount: number;
+    timestamp: string;
+    url: string;
+    ownerFullName?: string;
+    ownerUsername?: string;
+}
 
-    const trendingData = [
-        { id: 1, rank: 1, topic: 'Artificial Intelligence', category: 'tech', volume: '2.4M Tweets', growth: '+24%', isHot: true },
-        { id: 2, rank: 2, topic: 'Remote Work Trends 2026', category: 'business', volume: '850K Mentions', growth: '+15%', isHot: true },
-        { id: 3, rank: 3, topic: 'Short-form Video SEO', category: 'marketing', volume: '620K Searches', growth: '+45%', isHot: true },
-        { id: 4, rank: 4, topic: 'Web3 & Blockchain', category: 'tech', volume: '1.2M Mentions', growth: '-5%', isHot: false },
-        { id: 5, rank: 5, topic: 'Creator Economy', category: 'business', volume: '450K Tweets', growth: '+10%', isHot: false },
-        { id: 6, rank: 6, topic: 'Aged Domains Strategy', category: 'marketing', volume: '120K Mentions', growth: '+85%', isHot: false },
-        { id: 7, rank: 7, topic: 'React vs Vue 2026', category: 'tech', volume: '340K Tweets', growth: '+12%', isHot: false },
-        { id: 8, rank: 8, topic: 'B2B Lead Generation', category: 'business', volume: '280K Searches', growth: '+8%', isHot: false },
-    ];
+export default function TrendingTopics() {
+    const [hashtag, setHashtag] = useState('');
+    const [limit, setLimit] = useState(5);
+    const [loading, setLoading] = useState(false);
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleScrape = async () => {
+        if (!hashtag) return;
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/scrape-instagram`, {
+                hashtag: hashtag.startsWith('#') ? hashtag.slice(1) : hashtag,
+                limit: limit
+            }, {
+                headers: {
+                    Authorization: `Bearer ${JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token}`
+                }
+            });
+
+            if (res.data.success && res.data.posts) {
+                setPosts(res.data.posts);
+            } else if (res.data.error) {
+                setError(res.data.error);
+            } else {
+                setError('Failed to fetch trending posts.');
+            }
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'An error occurred while scraping.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <div className="max-w-5xl mx-auto pb-10">
-            <div className="flex items-center gap-3 mb-8">
-                <div className="p-3 rounded-2xl bg-brand-500/10 text-brand-500 shrink-0">
-                    <Flame className="w-6 h-6" />
+        <div className="max-w-6xl mx-auto pb-20 px-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                <div className="flex items-center gap-4">
+                    <div className="p-3.5 rounded-2xl bg-gradient-to-tr from-purple-600 via-pink-600 to-yellow-500 text-white shadow-xl shadow-pink-500/20">
+                        <Instagram className="w-8 h-8" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold text-foreground tracking-tight">Instagram Trending Scrapper</h1>
+                        <p className="text-muted-foreground mt-1">Harness AI to find viral content and trending hashtags.</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground">Trending Topics</h1>
-                    <p className="text-muted-foreground">Discover what's viral right now and join the conversation.</p>
-                </div>
-            </div>
 
-            {/* Category Filters */}
-            <div className="flex flex-wrap gap-3 mb-8">
-                {categories.map((cat, i) => (
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="relative group min-w-[200px]">
+                         <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-pink-500 transition-colors" />
+                         <input
+                            type="text"
+                            placeholder="Enter hashtag..."
+                            value={hashtag}
+                            onChange={(e) => setHashtag(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleScrape()}
+                            className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all font-medium"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 bg-background border border-border p-1.5 rounded-xl">
+                        <span className="text-xs font-bold px-2 text-muted-foreground">LIMIT</span>
+                        {[5, 10, 20].map((val) => (
+                            <button
+                                key={val}
+                                onClick={() => setLimit(val)}
+                                className={cn(
+                                    "w-8 h-8 rounded-lg text-xs font-bold transition-all",
+                                    limit === val 
+                                        ? "bg-pink-500 text-white shadow-lg shadow-pink-500/25" 
+                                        : "hover:bg-accent text-foreground/60"
+                                )}
+                            >
+                                {val}
+                            </button>
+                        ))}
+                    </div>
                     <button
-                        key={cat.id}
-                        className={cn(
-                            "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border",
-                            i === 0 
-                                ? "bg-brand-500 border-brand-500 text-white shadow-md shadow-brand-500/25" 
-                                : "bg-background/50 border-border/50 text-muted-foreground hover:bg-background/80"
-                        )}
+                        onClick={handleScrape}
+                        disabled={loading || !hashtag}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-pink-500/30 disabled:opacity-50 disabled:shadow-none flex items-center gap-2 transition-all active:scale-95"
                     >
-                        <cat.icon className="w-4 h-4" /> {cat.label}
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        {loading ? 'Analyzing...' : 'Scrape'}
                     </button>
-                ))}
+                </div>
             </div>
 
-            {/* Trending List */}
-            <div className="glass-card rounded-3xl overflow-hidden border border-border/30">
-                <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/30 bg-background/40 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    <div className="col-span-1 text-center">Rank</div>
-                    <div className="col-span-5 sm:col-span-6">Topic / Keyword</div>
-                    <div className="col-span-3 sm:col-span-3">Volume</div>
-                    <div className="col-span-3 sm:col-span-2 text-right">Trend</div>
+            {error && (
+                <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 flex items-center gap-3 mb-8 animate-in fade-in slide-in-from-top-4">
+                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <p className="text-sm font-medium">{error}</p>
                 </div>
+            )}
 
-                <div className="divide-y divide-border/30">
-                    {trendingData.map((item) => (
-                        <div key={item.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-background/30 transition-colors group">
-                            <div className="col-span-1 text-center font-black text-lg text-muted-foreground group-hover:text-brand-500 transition-colors">
-                                #{item.rank}
-                            </div>
-                            
-                            <div className="col-span-5 sm:col-span-6 flex items-center gap-3">
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="font-bold text-foreground text-sm sm:text-base truncate">{item.topic}</h3>
-                                        {item.isHot && (
-                                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500/10 shrink-0">
-                                                <Flame className="w-3 h-3 text-red-500" />
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded text-brand-500 bg-brand-500/10">
-                                            {item.category}
-                                        </span>
-                                    </div>
+            {!loading && posts.length === 0 && !error && (
+                <div className="flex flex-col items-center justify-center py-20 text-center glass-card border-dashed border-2 rounded-3xl opacity-60">
+                    <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center mb-4">
+                        <Flame className="w-10 h-10 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground">Ready to explore?</h3>
+                    <p className="text-muted-foreground max-w-sm mt-2">Enter any hashtag like <strong className="text-pink-500">#technology</strong> to see trending posts and engagement stats.</p>
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {posts.map((post, i) => (
+                    <div 
+                        key={i} 
+                        className="group flex flex-col bg-background border border-border/50 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-pink-500/5 transition-all duration-300 hover:-translate-y-1"
+                    >
+                        <div className="relative aspect-square overflow-hidden bg-accent">
+                            <img 
+                                src={post.displayUrl} 
+                                alt="Post thumbnail" 
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6">
+                                <div className="flex flex-col items-center text-white scale-0 group-hover:scale-100 transition-transform delay-75 duration-300">
+                                    <Heart className="w-8 h-8 fill-red-500 text-red-500 mb-1" />
+                                    <span className="font-black text-lg">{post.likesCount?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex flex-col items-center text-white scale-0 group-hover:scale-100 transition-transform delay-100 duration-300">
+                                    <MessageSquare className="w-8 h-8 fill-white mb-1" />
+                                    <span className="font-black text-lg">{post.commentsCount?.toLocaleString()}</span>
                                 </div>
                             </div>
+                            <a 
+                                href={post.url} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="absolute right-3 top-3 p-2 rounded-lg bg-black/20 backdrop-blur-md text-white/80 hover:text-white transition-colors"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                            </a>
+                        </div>
+                        
+                        <div className="p-4 flex flex-col flex-1">
+                            {post.ownerUsername && (
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-yellow-400 to-fuchsia-600 p-[1.5px]">
+                                        <div className="w-full h-full rounded-full bg-background flex items-center justify-center text-[10px] font-bold">
+                                            {post.ownerUsername[0].toUpperCase()}
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-bold text-foreground">@{post.ownerUsername}</span>
+                                </div>
+                            )}
                             
-                            <div className="col-span-3 sm:col-span-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                                <MessageSquare className="w-4 h-4 hidden sm:block opacity-50" />
-                                {item.volume}
-                            </div>
+                            <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed mb-4 flex-1">
+                                {post.caption || 'No caption provided.'}
+                            </p>
                             
-                            <div className="col-span-3 sm:col-span-2 flex justify-end">
-                                <span className={cn(
-                                    "text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1",
-                                    item.growth.startsWith('+') ? "text-green-500 bg-green-500/10" : "text-red-500 bg-red-500/10"
-                                )}>
-                                    <TrendingUp className={cn("w-3 h-3", item.growth.startsWith('-') && "rotate-180")} />
-                                    {item.growth}
-                                </span>
+                            <div className="flex items-center justify-between pt-4 border-t border-border/50 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                <div className="flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    {new Date(post.timestamp).toLocaleDateString()}
+                                </div>
+                                <div className="text-pink-500 flex items-center gap-1">
+                                    <Flame className="w-3.5 h-3.5" />
+                                    POPULAR
+                                </div>
                             </div>
                         </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Use Case Helper */}
-            <div className="mt-8 glass-card rounded-2xl p-6 bg-brand-500/5 items-start gap-4 flex border border-brand-500/20">
-                <div className="p-3 rounded-xl bg-brand-500/10 shrink-0">
-                    <Hash className="w-6 h-6 text-brand-500" />
-                </div>
-                <div>
-                    <h3 className="text-base font-bold text-foreground mb-1">How to use Trending Topics</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                        Copy these high-volume keywords and plug them into the <strong className="text-foreground">Tweet Generator</strong> or <strong className="text-foreground">Hashtag Generator</strong> to naturally insert your brand into viral conversations and boost organic reach.
-                    </p>
-                </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
