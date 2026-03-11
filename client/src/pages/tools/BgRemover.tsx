@@ -25,16 +25,25 @@ export default function BgRemover() {
         reader.readAsDataURL(f);
     }, []);
 
-    const handleRemoveBg = async () => {
+const handleRemoveBg = async () => {
         if (!file) return;
         setLoading(true);
         setError(null);
+        setResultUrl(null);
         
         try {
-            // Use source_image_base64 as expected by the N8N webhook
+            // Check if VITE_API_URL is missing or set to localhost while on a production domain
+            const isProd = window.location.hostname !== 'localhost';
+            const apiBase = import.meta.env.VITE_API_URL || '';
+            const isApiLocal = !apiBase || apiBase.includes('localhost');
+            
+            if (isProd && isApiLocal) {
+                console.warn('VITE_API_URL is not set for production. This tool might fail.');
+            }
+
             const base64Data = file.data.includes(',') ? file.data.split(',')[1] : file.data;
             
-            const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/remove-bg`, {
+            const res = await axios.post(`${apiBase || 'http://localhost:5000'}/api/tools/remove-bg`, {
                 source_image_base64: base64Data,
                 fileName: file.name
             }, {
@@ -42,67 +51,51 @@ export default function BgRemover() {
                     Authorization: `Bearer ${JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token}`
                 },
                 responseType: 'arraybuffer',
-                timeout: 60000,
+                timeout: 120000, // 2 minute timeout for processing
             });
 
-            const contentType = res.headers['content-type'] || '';
-            const text = new TextDecoder().decode(res.data);
+            const contentType = res.headers['content-type'] || 'image/png';
             
+            // Try to see if it's JSON first (error messages or base64 wrapped in JSON)
+            const text = new TextDecoder().decode(res.data);
             let parsedJson: any = null;
             try {
                 parsedJson = JSON.parse(text);
-            } catch (e) {
-                // Not JSON
-            }
+            } catch (e) { /* Not JSON */ }
 
             if (parsedJson) {
+                // If the response is JSON, find the image data anywhere inside it
                 const findImage = (obj: any): string | null => {
                     if (!obj) return null;
-                    
                     if (typeof obj === 'string') {
                         if (obj.startsWith('http') || obj.startsWith('data:image')) return obj;
                         // Check if it's a raw base64 string
-                        const trimmed = obj.trim();
-                        const raw = trimmed.replace(/\s/g, '');
-                        if (raw.length > 500 && /^[A-Za-z0-9+/=]+$/.test(raw.substring(0, 100))) {
-                            // Detect image type from base64 header
+                        const trimmed = obj.trim().replace(/\s/g, '');
+                        if (trimmed.length > 500 && /^[A-Za-z0-9+/=]+$/.test(trimmed.substring(0, 100))) {
                             let type = 'png';
-                            if (raw.startsWith('UklGR')) type = 'webp';
-                            else if (raw.startsWith('/9j/')) type = 'jpeg';
-                            else if (raw.startsWith('iVBORw')) type = 'png';
-                            
-                            return `data:image/${type};base64,${raw}`;
+                            if (trimmed.startsWith('UklGR')) type = 'webp';
+                            else if (trimmed.startsWith('/9j/')) type = 'jpeg';
+                            else if (trimmed.startsWith('iVBORw')) type = 'png';
+                            return `data:image/${type};base64,${trimmed}`;
                         }
                         return null;
                     }
-                    
                     if (Array.isArray(obj)) {
                         for (const item of obj) {
                             const found = findImage(item);
                             if (found) return found;
                         }
                     } else if (typeof obj === 'object') {
-                        // Check common field names directly first
-                        const imageFields = ['image_file_b64', 'source_image_base64', 'imageUrl', 'image', 'url', 'output', 'result', 'data'];
+                        const imageFields = ['image_file_b64', 'source_image_base64', 'imageUrl', 'image', 'url', 'output', 'result', 'data', 'response'];
                         for (const field of imageFields) {
                             if (obj[field]) {
                                 const found = findImage(obj[field]);
                                 if (found) return found;
                             }
                         }
-
-                        // Check nested structures like requestBody
-                        if (obj.requestBody) {
-                            const found = findImage(obj.requestBody);
-                            if (found) return found;
-                        }
-
-                        // Recursive search for other fields
                         for (const key in obj) {
-                            if (!imageFields.includes(key) && key !== 'requestBody') {
-                                const found = findImage(obj[key]);
-                                if (found) return found;
-                            }
+                            const found = findImage(obj[key]);
+                            if (found) return found;
                         }
                     }
                     return null;
@@ -112,15 +105,17 @@ export default function BgRemover() {
                 if (imageUrl) {
                     setResultUrl(imageUrl);
                 } else {
-                    setError('Could not find image data in response.');
+                    setError('Detected JSON response but could not extract image data.');
                 }
             } else if (contentType.includes('image')) {
-                const blob = new Blob([res.data], { type: contentType || 'image/png' });
+                // It's raw binary image data
+                const blob = new Blob([res.data], { type: contentType });
                 const objectUrl = URL.createObjectURL(blob);
                 setResultUrl(objectUrl);
             } else if (text.startsWith('http') || text.startsWith('data:image')) {
                 setResultUrl(text.trim());
-            } else if (text.length > 500 || /^[A-Za-z0-9+/=]+$/.test(text.trim().substring(0, 100))) {
+            } else if (text.length > 500 && /^[A-Za-z0-9+/=]+$/.test(text.trim().substring(0, 100))) {
+                // It's a raw base64 string
                 const raw = text.trim().replace(/\s/g, '');
                 let type = 'png';
                 if (raw.startsWith('UklGR')) type = 'webp';
@@ -128,12 +123,15 @@ export default function BgRemover() {
                 else if (raw.startsWith('iVBORw')) type = 'png';
                 setResultUrl(`data:image/${type};base64,${raw}`);
             } else {
+                // Fallback: try blob anyway
                 const blob = new Blob([res.data], { type: 'image/png' });
                 const objectUrl = URL.createObjectURL(blob);
                 setResultUrl(objectUrl);
             }
         } catch (err: any) {
-            setError(err.response?.data?.message || err.message || 'An error occurred removing the background.');
+            console.error('Removal Error:', err);
+            const message = err.response?.data ? new TextDecoder().decode(err.response.data) : (err.message || 'Error occurred');
+            setError(message.length < 200 ? message : 'Background removal service timeout or failure.');
         } finally {
             setLoading(false);
         }

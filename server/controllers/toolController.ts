@@ -92,6 +92,8 @@ export const utilityGeneric = async (req: Request, res: Response) => {
 export const removeBackground = async (req: Request, res: Response) => {
     try {
         const endpoint = process.env.N8N_BG_REMOVER_ENDPOINT || 'https://cmpunktg7.app.n8n.cloud/webhook/remove-bg';
+        
+        console.log(`Triggering BG Remover: ${endpoint}`);
 
         const response = await axios.post(endpoint as string, req.body, {
             responseType: 'arraybuffer',
@@ -104,8 +106,11 @@ export const removeBackground = async (req: Request, res: Response) => {
 
         const contentType = response.headers['content-type'] || 'image/png';
         res.set('Content-Type', contentType);
-        res.send(response.data);
+        
+        // Use Buffer.from to ensure consistent binary delivery in Node.js
+        res.send(Buffer.from(response.data));
     } catch (error: any) {
+        console.error('BG Remover Error:', error.message);
         let message = error.message || 'Background removal failed';
         if (error.response?.data) {
             try {
