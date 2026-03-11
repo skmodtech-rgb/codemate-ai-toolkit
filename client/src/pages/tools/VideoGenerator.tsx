@@ -26,7 +26,7 @@ export default function VideoGenerator() {
             const res = await axios.post(ENDPOINTS[model], { prompt }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const url = res.data?.videoUrl || res.data?.video || res.data?.url || res.data?.output;
+            const url = res.data?.videoUrl || res.data?.video || res.data?.url || res.data?.output || res.data?.data?.video_url || res.data?.data?.url;
             if (url) {
                 setResultUrl(url);
             } else if (typeof res.data === 'string' && res.data.startsWith('http')) {

@@ -28,7 +28,7 @@ export default function ImageGenerator() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             // n8n webhook may return the image URL in different formats
-            const url = res.data?.imageUrl || res.data?.image || res.data?.url || res.data?.output;
+            const url = res.data?.imageUrl || res.data?.image || res.data?.url || res.data?.output || res.data?.generated_image || res.data?.data?.imageUrl;
             if (url) {
                 setResultUrl(url);
             } else if (typeof res.data === 'string' && res.data.startsWith('http')) {

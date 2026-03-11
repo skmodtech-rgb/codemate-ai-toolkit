@@ -18,12 +18,12 @@ export default function TextToSpeech() {
         try {
             const token = JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token;
             const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/text-to-speech`, { 
-                text 
+                input: text 
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
-            const url = res.data?.audioUrl || res.data?.audio || res.data?.url || res.data?.output;
+            const url = res.data?.audio_base64 || res.data?.audioUrl || res.data?.audio || res.data?.url || res.data?.output;
             if (url) {
                 setResultUrl(url);
             } else if (typeof res.data === 'string' && res.data.startsWith('http')) {
