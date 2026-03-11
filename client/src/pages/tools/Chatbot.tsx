@@ -63,20 +63,38 @@ export default function Chatbot() {
                 }
             );
 
-            let replyText = '';
             const responseData = Array.isArray(res.data) ? res.data[0] : res.data;
             
-            if (responseData?.data?.choices?.[0]?.message?.content) {
-                replyText = responseData.data.choices[0].message.content;
-            } else if (responseData?.choices?.[0]?.message?.content) {
-                replyText = responseData.choices[0].message.content;
-            } else if (responseData?.reply) {
-                replyText = responseData.reply;
-            } else if (typeof responseData === 'string') {
-                replyText = responseData;
-            } else if (responseData) {
-                replyText = JSON.stringify(responseData, null, 2);
-            }
+            const extractContent = (data: any): string => {
+                if (!data) return '';
+                if (typeof data === 'string') return data;
+                
+                // Known deep structures from webhook
+                if (data.response?.data?.choices?.[0]?.message?.content) {
+                    return data.response.data.choices[0].message.content;
+                }
+                if (data.response?.choices?.[0]?.message?.content) {
+                    return data.response.choices[0].message.content;
+                }
+                if (data.data?.choices?.[0]?.message?.content) {
+                    return data.data.choices[0].message.content;
+                }
+                if (data.choices?.[0]?.message?.content) {
+                    return data.choices[0].message.content;
+                }
+                if (typeof data.reply === 'string') {
+                    return data.reply;
+                }
+                if (data.reply?.content) {
+                    return data.reply.content;
+                }
+                if (data.response?.content) {
+                    return data.response.content;
+                }
+                return JSON.stringify(data, null, 2);
+            };
+
+            const replyText = extractContent(responseData);
 
             if (replyText) {
                 setMessages(prev => [...prev, {
