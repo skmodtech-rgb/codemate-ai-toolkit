@@ -57,24 +57,42 @@ export default function BgRemover() {
 
             if (parsedJson) {
                 const findImage = (obj: any): string | null => {
+                    if (!obj) return null;
+                    
                     if (typeof obj === 'string') {
                         if (obj.startsWith('http') || obj.startsWith('data:image')) return obj;
-                        if (obj.length > 1000) return `data:image/png;base64,${obj.trim()}`;
+                        // Check if it's a raw base64 string
+                        if (obj.length > 500 && /^[A-Za-z0-9+/=]+$/.test(obj.trim().substring(0, 100))) {
+                            return `data:image/png;base64,${obj.trim()}`;
+                        }
                         return null;
                     }
+                    
                     if (Array.isArray(obj)) {
                         for (const item of obj) {
                             const found = findImage(item);
                             if (found) return found;
                         }
-                    } else if (typeof obj === 'object' && obj !== null) {
+                    } else if (typeof obj === 'object') {
+                        // Check common field names directly first
+                        const imageFields = ['image_file_b64', 'source_image_base64', 'imageUrl', 'image', 'url', 'output', 'result', 'data'];
+                        for (const field of imageFields) {
+                            if (obj[field]) {
+                                const found = findImage(obj[field]);
+                                if (found) return found;
+                            }
+                        }
+
+                        // Check nested structures like requestBody
+                        if (obj.requestBody) {
+                            const found = findImage(obj.requestBody);
+                            if (found) return found;
+                        }
+
+                        // Recursive search for other fields
                         for (const key in obj) {
-                            const val = obj[key];
-                            if (typeof val === 'string') {
-                                if (val.startsWith('http') || val.startsWith('data:image')) return val;
-                                if (val.length > 1000) return `data:image/png;base64,${val.trim()}`;
-                            } else if (typeof val === 'object') {
-                                const found = findImage(val);
+                            if (!imageFields.includes(key) && key !== 'requestBody') {
+                                const found = findImage(obj[key]);
                                 if (found) return found;
                             }
                         }
@@ -94,7 +112,7 @@ export default function BgRemover() {
                 setResultUrl(objectUrl);
             } else if (text.startsWith('http') || text.startsWith('data:image')) {
                 setResultUrl(text.trim());
-            } else if (text.length > 1000 && !text.includes('\ufffd')) {
+            } else if (text.length > 500 && /^[A-Za-z0-9+/=]+$/.test(text.trim().substring(0, 100))) {
                 setResultUrl(`data:image/png;base64,${text.trim()}`);
             } else {
                 const blob = new Blob([res.data], { type: 'image/png' });
