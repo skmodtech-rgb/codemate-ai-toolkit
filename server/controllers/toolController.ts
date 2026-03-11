@@ -230,9 +230,9 @@ export const geminiBrain = async (req: Request, res: Response) => {
             lastError = error;
             const errorMsg = error.message || '';
             
-            // Check if it's a 429 or quota error
-            if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('Too Many Requests')) {
-                console.warn(`Gemini Key ${i + 1} exhausted (429/Quota). Trying next key...`);
+            // Check if it's an error that warrants rotation (429 quota, 403 forbidden/leaked, or generic quota)
+            if (errorMsg.includes('429') || errorMsg.includes('403') || errorMsg.includes('quota') || errorMsg.includes('Too Many Requests') || errorMsg.includes('Forbidden')) {
+                console.warn(`Gemini Key ${i + 1} failed (${errorMsg.substring(0, 50)}...). Rotating to next key...`);
                 continue; // Try the next key
             } else {
                 // If it's a different kind of error (e.g. invalid prompt), don't bother rotating
