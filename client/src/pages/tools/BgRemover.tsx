@@ -46,35 +46,60 @@ export default function BgRemover() {
             });
 
             const contentType = res.headers['content-type'] || '';
+            const text = new TextDecoder().decode(res.data);
             
-            if (contentType.includes('image') || res.data instanceof ArrayBuffer) {
-                // Binary image response → convert to data URL
+            let parsedJson: any = null;
+            try {
+                parsedJson = JSON.parse(text);
+            } catch (e) {
+                // Not JSON
+            }
+
+            if (parsedJson) {
+                const findImage = (obj: any): string | null => {
+                    if (typeof obj === 'string') {
+                        if (obj.startsWith('http') || obj.startsWith('data:image')) return obj;
+                        if (obj.length > 1000) return `data:image/png;base64,${obj.trim()}`;
+                        return null;
+                    }
+                    if (Array.isArray(obj)) {
+                        for (const item of obj) {
+                            const found = findImage(item);
+                            if (found) return found;
+                        }
+                    } else if (typeof obj === 'object' && obj !== null) {
+                        for (const key in obj) {
+                            const val = obj[key];
+                            if (typeof val === 'string') {
+                                if (val.startsWith('http') || val.startsWith('data:image')) return val;
+                                if (val.length > 1000) return `data:image/png;base64,${val.trim()}`;
+                            } else if (typeof val === 'object') {
+                                const found = findImage(val);
+                                if (found) return found;
+                            }
+                        }
+                    }
+                    return null;
+                };
+
+                const imageUrl = findImage(parsedJson);
+                if (imageUrl) {
+                    setResultUrl(imageUrl);
+                } else {
+                    setError('Could not find image data in response.');
+                }
+            } else if (contentType.includes('image')) {
                 const blob = new Blob([res.data], { type: contentType || 'image/png' });
                 const objectUrl = URL.createObjectURL(blob);
                 setResultUrl(objectUrl);
+            } else if (text.startsWith('http') || text.startsWith('data:image')) {
+                setResultUrl(text.trim());
+            } else if (text.length > 1000 && !text.includes('\ufffd')) {
+                setResultUrl(`data:image/png;base64,${text.trim()}`);
             } else {
-                // Try parsing as JSON (in case it's a JSON response with a URL)
-                const text = new TextDecoder().decode(res.data);
-                try {
-                    const json = JSON.parse(text);
-                    const url = json?.imageUrl || json?.image || json?.url || json?.output || json?.result;
-                    if (url && typeof url === 'string' && url.startsWith('http')) {
-                        setResultUrl(url);
-                    } else if (typeof json === 'string' && json.startsWith('data:image')) {
-                        setResultUrl(json);
-                    } else {
-                        setError('Unexpected response format.');
-                    }
-                } catch {
-                    // Maybe it's a base64 string
-                    if (text.startsWith('data:image')) {
-                        setResultUrl(text);
-                    } else if (text.startsWith('http')) {
-                        setResultUrl(text.trim());
-                    } else {
-                        setError('Unexpected response format.');
-                    }
-                }
+                const blob = new Blob([res.data], { type: 'image/png' });
+                const objectUrl = URL.createObjectURL(blob);
+                setResultUrl(objectUrl);
             }
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || 'An error occurred removing the background.');
