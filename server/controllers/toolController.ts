@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // --- AI Image Generator ---
 export const generateImage = async (req: Request, res: Response) => {
@@ -196,5 +197,31 @@ export const n8nProxy = async (req: Request, res: Response) => {
         }
 
         res.status(500).json({ success: false, message });
+    }
+};
+
+// --- Gemini Brain for Problem Solving Tools ---
+export const geminiBrain = async (req: Request, res: Response) => {
+    try {
+        const { prompt } = req.body;
+        
+        const apiKey = process.env.GEMINI_API_KEY;
+        const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+
+        if (!apiKey) {
+            throw new Error('Gemini API key is not configured on the server.');
+        }
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: modelName });
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        res.json({ success: true, response: text });
+    } catch (error: any) {
+        console.error('Gemini Brain Error:', error.message);
+        res.status(500).json({ success: false, message: error.message || 'AI Generation failed' });
     }
 };
