@@ -148,6 +148,7 @@ export const n8nProxy = async (req: Request, res: Response) => {
         else if (action === 'ai-chat') endpoint = process.env.N8N_CHATBOT_ENDPOINT!;
         else if (action === 'generate-image') endpoint = process.env.N8N_IMAGE_FAST_ENDPOINT!;
         else if (action === 'generate-image-pro') endpoint = process.env.N8N_IMAGE_PRO_ENDPOINT!;
+        else if (action === 'text-to-speech') endpoint = process.env.N8N_TTS_ENDPOINT!;
         
         if (!endpoint) {
             const baseUrl = 'https://cmpunktg7.app.n8n.cloud';
@@ -156,13 +157,44 @@ export const n8nProxy = async (req: Request, res: Response) => {
         
         const response = await axios.post(endpoint, req.body, {
             timeout: 120000,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            responseType: 'arraybuffer' // Request buffer so we can handle binary/json properly
         });
 
-        res.json(response.data);
+        const contentType = response.headers['content-type'] || 'application/json';
+        
+        // If it's a binary format, send it directly
+        if (contentType.includes('audio') || contentType.includes('image') || contentType.includes('video') || contentType.includes('octet-stream')) {
+            res.set('Content-Type', contentType);
+            return res.send(Buffer.from(response.data));
+        }
+
+        // Otherwise try to treat it as JSON
+        try {
+            const text = new TextDecoder().decode(response.data);
+            const json = JSON.parse(text);
+            res.json(json);
+        } catch (e) {
+            // Fallback: if not JSON, just send the raw data with whatever type we got
+            res.set('Content-Type', contentType);
+            res.send(Buffer.from(response.data));
+        }
     } catch (error: any) {
         console.error(`Proxy error for ${action}:`, error.message);
-        let message = error.response?.data?.message || error.response?.data || error.message || 'Action failed';
-        res.status(500).json({ success: false, message: typeof message === 'string' ? message : 'Action failed' });
+        let message = 'Action failed';
+        
+        if (error.response?.data) {
+             try {
+                const text = new TextDecoder().decode(error.response.data);
+                const json = JSON.parse(text);
+                message = json.message || message;
+            } catch (e) {
+                message = error.message || message;
+            }
+        } else {
+            message = error.message || message;
+        }
+
+        res.status(500).json({ success: false, message });
     }
 };

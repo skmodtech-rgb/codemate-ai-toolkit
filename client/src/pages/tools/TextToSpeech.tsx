@@ -20,19 +20,39 @@ export default function TextToSpeech() {
             const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/text-to-speech`, { 
                 input: text 
             }, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'arraybuffer'
             });
             
-            const url = res.data?.audio_base64 || res.data?.audioUrl || res.data?.audio || res.data?.url || res.data?.output;
-            if (url) {
-                setResultUrl(url);
-            } else if (typeof res.data === 'string' && res.data.startsWith('http')) {
-                setResultUrl(res.data);
-            } else {
-                setError('Unexpected response format. Please try again.');
+            // Try to see if it's JSON first
+            const textContent = new TextDecoder().decode(res.data);
+            let parsed: any = null;
+            try {
+                parsed = JSON.parse(textContent);
+            } catch (e) { /* Not JSON, likely raw binary */ }
+
+            if (parsed) {
+                const url = parsed.audio_base64 || parsed.audioUrl || parsed.audio || parsed.url || parsed.output || parsed.data?.audio;
+                if (url) {
+                    if (url.startsWith('http') || url.startsWith('data:')) {
+                        setResultUrl(url);
+                    } else {
+                        // Assume raw base64
+                        setResultUrl(`data:audio/mpeg;base64,${url}`);
+                    }
+                    return;
+                }
             }
+
+            // If it reached here, treat it as direct binary
+            const contentType = res.headers['content-type'] || 'audio/mpeg';
+            const blob = new Blob([res.data], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            setResultUrl(url);
+            
         } catch (err: any) {
-            setError(err.response?.data?.message || err.message || 'An error occurred.');
+            const decodedError = err.response?.data ? new TextDecoder().decode(err.response.data) : (err.message || 'An error occurred.');
+            setError(decodedError);
         } finally {
             setLoading(false);
         }
