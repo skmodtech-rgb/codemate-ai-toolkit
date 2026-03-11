@@ -91,16 +91,16 @@ const handleRemoveBg = async () => {
                             if (found) return found;
                         }
                     } else if (typeof obj === 'object') {
-                        // Added 'image_base64' as found in n8n screenshot
-                        const imageFields = ['image_base64', 'image_file_b64', 'source_image_base64', 'imageUrl', 'image', 'url', 'output', 'result', 'data', 'response'];
+                        // Prioritize common field names including 'result_b64' from n8n
+                        const imageFields = ['result_b64', 'image_base64', 'image_file_b64', 'source_image_base64', 'imageUrl', 'image', 'url', 'output', 'result', 'data', 'response', 'generated_image'];
                         for (const field of imageFields) {
                             if (obj[field]) {
                                 const found = findImage(obj[field]);
                                 if (found) return found;
                             }
                         }
-                        for (const key in obj) {
-                            const found = findImage(obj[key]);
+                        for (const key in (obj as any)) {
+                            const found = findImage((obj as any)[key]);
                             if (found) return found;
                         }
                     }
