@@ -128,15 +128,15 @@ const categories = [
         icon: Share2,
         sectionId: "content-creator-suite",
         tools: [
-            { name: 'Tweet Generator', path: '/app/tweet-generator', icon: MessageSquare, active: false },
-            { name: 'Thread Creator', path: '/app/thread-creator', icon: ListTree, active: false },
-            { name: 'Hashtag Generator', path: '/app/hashtag-generator', icon: Hash, active: false },
-            { name: 'Caption Writer', path: '/app/caption-writer', icon: PenTool, active: false },
-            { name: 'Post Scheduler', path: '/app/post-scheduler', icon: CalendarDays, active: false },
-            { name: 'Analytics Dashboard', path: '/app/analytics', icon: BarChart, active: false },
-            { name: 'Trending Topics', path: '/app/trending', icon: TrendingUp, active: false },
-            { name: 'Auto Poster', path: '/app/auto-poster', icon: Share2, active: false },
-            { name: 'Content Calendar', path: '/app/content-calendar', icon: CalendarDays, active: false },
+            { name: 'Tweet Generator', path: '/app/tweet-generator', icon: MessageSquare, active: true },
+            { name: 'Thread Creator', path: '/app/thread-creator', icon: ListTree, active: true },
+            { name: 'Hashtag Generator', path: '/app/hashtag-generator', icon: Hash, active: true },
+            { name: 'Caption Writer', path: '/app/caption-writer', icon: PenTool, active: true },
+            { name: 'Post Scheduler', path: '/app/post-scheduler', icon: CalendarDays, active: true },
+            { name: 'Analytics Dashboard', path: '/app/analytics', icon: BarChart, active: true },
+            { name: 'Trending Topics', path: '/app/trending', icon: TrendingUp, active: true },
+            { name: 'Auto Poster', path: '/app/auto-poster', icon: Share2, active: true },
+            { name: 'Content Calendar', path: '/app/content-calendar', icon: CalendarDays, active: true },
         ]
     }
 ];

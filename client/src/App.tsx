@@ -69,6 +69,17 @@ import Profile from './pages/tools/Profile';
 import ChangePassword from './pages/tools/ChangePassword';
 import VerifyEmail from './pages/VerifyEmail';
 
+// Social Media Tools
+import TweetGenerator from './pages/tools/TweetGenerator';
+import ThreadCreator from './pages/tools/ThreadCreator';
+import HashtagGenerator from './pages/tools/HashtagGenerator';
+import CaptionWriter from './pages/tools/CaptionWriter';
+import PostScheduler from './pages/tools/PostScheduler';
+import AnalyticsDashboard from './pages/tools/AnalyticsDashboard';
+import TrendingTopics from './pages/tools/TrendingTopics';
+import AutoPoster from './pages/tools/AutoPoster';
+import ContentCalendar from './pages/tools/ContentCalendar';
+
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { user } = useStore();
@@ -160,6 +171,17 @@ function App() {
                     <Route path="js-minifier" element={<JsMinifier />} />
                     <Route path="api-tester" element={<ApiTester />} />
                     <Route path="sql-formatter" element={<SqlFormatter />} />
+
+                    {/* Social Media & Marketing */}
+                    <Route path="tweet-generator" element={<TweetGenerator />} />
+                    <Route path="thread-creator" element={<ThreadCreator />} />
+                    <Route path="hashtag-generator" element={<HashtagGenerator />} />
+                    <Route path="caption-writer" element={<CaptionWriter />} />
+                    <Route path="post-scheduler" element={<PostScheduler />} />
+                    <Route path="analytics" element={<AnalyticsDashboard />} />
+                    <Route path="trending" element={<TrendingTopics />} />
+                    <Route path="auto-poster" element={<AutoPoster />} />
+                    <Route path="content-calendar" element={<ContentCalendar />} />
 
                     {/* Profile & Settings */}
                     <Route path="profile" element={<Profile />} />
