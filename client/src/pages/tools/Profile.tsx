@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Camera, Save, Loader2, Check, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { User, Mail, Camera, Save, Loader2, Check, Lock, Eye, EyeOff, ShieldCheck, Key as KeyIcon } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import axios from 'axios';
 
@@ -21,6 +21,17 @@ export default function Profile() {
     const [passwordSaving, setPasswordSaving] = useState(false);
     const [passwordSaved, setPasswordSaved] = useState(false);
     const [passwordError, setPasswordError] = useState('');
+
+    // API Keys
+    const [geminiKey, setGeminiKey] = useState('');
+    const [keySaving, setKeySaving] = useState(false);
+    const [keySaved, setKeySaved] = useState(false);
+
+    // Initial load from local storage
+    useState(() => {
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if (savedKey) setGeminiKey(savedKey);
+    });
 
     const handleProfileSave = async () => {
         setSaving(true);
@@ -66,6 +77,20 @@ export default function Profile() {
         } finally {
             setPasswordSaving(false);
         }
+    };
+
+    const handleSaveGeminiKey = () => {
+        setKeySaving(true);
+        if (geminiKey.trim()) {
+            localStorage.setItem('gemini_api_key', geminiKey.trim());
+        } else {
+            localStorage.removeItem('gemini_api_key');
+        }
+        setTimeout(() => {
+            setKeySaved(true);
+            setKeySaving(false);
+            setTimeout(() => setKeySaved(false), 2000);
+        }, 600);
     };
 
     return (
@@ -177,6 +202,51 @@ export default function Profile() {
                         {passwordSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : passwordSaved ? <><Check className="w-4 h-4" /> Updated!</> : <><Lock className="w-4 h-4" /> Update Password</>}
                     </button>
                 </form>
+            </div>
+
+            {/* API Keys Card */}
+            <div className="glass-card rounded-3xl p-5 sm:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center">
+                        <KeyIcon className="w-5 h-5 text-brand-500" />
+                    </div>
+                    <div>
+                        <h3 className="text-base font-bold text-foreground">API Providers</h3>
+                        <p className="text-xs text-muted-foreground">Manage your AI API keys for local execution</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-2 flex items-center justify-between">
+                            <span>Google Gemini API Key</span>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-xs text-brand-500 hover:underline">
+                                Get key →
+                            </a>
+                        </label>
+                        <div className="relative">
+                            <KeyIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground" />
+                            <input 
+                                type="password" 
+                                value={geminiKey}
+                                onChange={e => setGeminiKey(e.target.value)} 
+                                placeholder="AIzaSy..."
+                                className="glass-input w-full py-3 pl-11 pr-4 rounded-2xl text-sm" 
+                            />
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
+                            Your key is stored <strong>locally in your browser</strong> (localStorage) and is never sent to our servers. It is used directly by the AI Creator Studio to generate content.
+                        </p>
+                    </div>
+                    
+                    <button 
+                        onClick={handleSaveGeminiKey} 
+                        disabled={keySaving}
+                        className="btn-primary w-full h-11 rounded-2xl text-sm font-semibold gap-2 disabled:opacity-50 mt-2"
+                    >
+                        {keySaving ? <Loader2 className="w-4 h-4 animate-spin" /> : keySaved ? <><Check className="w-4 h-4" /> Saved Locally!</> : <><Save className="w-4 h-4" /> Save API Key</>}
+                    </button>
+                </div>
             </div>
         </motion.div>
     );

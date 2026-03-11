@@ -31,21 +31,20 @@ const categories = [
         ]
     },
     {
-        title: "Document Workshop",
-        description: "PDF & Document Magic",
+        title: "AI Intelligence",
+        description: "Problem-Solving AI Tools",
         color: "from-brand-600 to-brand-500",
-        icon: FileText,
-        sectionId: "document-workshop",
+        icon: Zap,
+        sectionId: "ai-intelligence",
         tools: [
-            { name: 'PDF to Word', path: '/app/pdf-to-word', icon: FileText, active: true },
-            { name: 'Word to PDF', path: '/app/word-to-pdf', icon: File, active: true },
-            { name: 'PDF Merger', path: '/app/pdf-merger', icon: Files, active: true },
-            { name: 'PDF Splitter', path: '/app/pdf-splitter', icon: SplitSquareHorizontal, active: true },
-            { name: 'PDF Compressor', path: '/app/pdf-compressor', icon: Minimize2, active: true },
-            { name: 'Image to PDF', path: '/app/image-to-pdf', icon: ImagePlus, active: true },
-            { name: 'PDF to Images', path: '/app/pdf-to-images', icon: FileImage, active: true },
-            { name: 'Resume Parser', path: '/app/resume-parser', icon: FileSearch, active: false },
-            { name: 'Document Translator', path: '/app/document-translator', icon: Globe, active: false },
+            { name: 'AI StudyMate', path: '/app/ai-studymate', icon: FileText, active: true },
+            { name: 'Resume Analyzer', path: '/app/resume-analyzer', icon: User, active: true },
+            { name: 'Interview Bot', path: '/app/interview-bot', icon: MessageSquare, active: true },
+            { name: 'Literature Review', path: '/app/literature-review', icon: Files, active: true },
+            { name: 'Document Q&A', path: '/app/document-qa', icon: FileSearch, active: true },
+            { name: 'SEO Blog Writer', path: '/app/blog-writer', icon: PenTool, active: true },
+            { name: 'Website Summarizer', path: '/app/website-summarizer', icon: Globe, active: true },
+            { name: 'Startup Idea Gen', path: '/app/idea-generator', icon: Zap, active: true },
         ]
     },
     {
@@ -65,6 +64,60 @@ const categories = [
             { name: 'GIF to Video', path: '/app/gif-to-video', icon: Camera, active: true },
             { name: 'Screen Recorder', path: '/app/screen-recorder', icon: Monitor, active: true },
             { name: 'Webcam Recorder', path: '/app/webcam-recorder', icon: Camera, active: true },
+        ]
+    },
+    {
+        title: "Content Creator Suite",
+        description: "Social Media & Marketing",
+        color: "from-brand-500 to-brand-400",
+        icon: Share2,
+        sectionId: "content-creator-suite",
+        tools: [
+            { name: 'Tweet Generator', path: '/app/tweet-generator', icon: MessageSquare, active: true },
+            { name: 'Thread Creator', path: '/app/thread-creator', icon: ListTree, active: true },
+            { name: 'Hashtag Generator', path: '/app/hashtag-generator', icon: Hash, active: true },
+            { name: 'Caption Writer', path: '/app/caption-writer', icon: PenTool, active: true },
+            { name: 'Post Scheduler', path: '/app/post-scheduler', icon: CalendarDays, active: true },
+            { name: 'Analytics Dashboard', path: '/app/analytics', icon: BarChart, active: true },
+            { name: 'Trending Topics', path: '/app/trending', icon: TrendingUp, active: true },
+            { name: 'Auto Poster', path: '/app/auto-poster', icon: Share2, active: true },
+            { name: 'Content Calendar', path: '/app/content-calendar', icon: CalendarDays, active: true },
+        ]
+    },
+    {
+        title: "Document Workshop",
+        description: "PDF & Document Magic",
+        color: "from-brand-600 to-brand-500",
+        icon: FileText,
+        sectionId: "document-workshop",
+        tools: [
+            { name: 'PDF to Word', path: '/app/pdf-to-word', icon: FileText, active: true },
+            { name: 'Word to PDF', path: '/app/word-to-pdf', icon: File, active: true },
+            { name: 'PDF Merger', path: '/app/pdf-merger', icon: Files, active: true },
+            { name: 'PDF Splitter', path: '/app/pdf-splitter', icon: SplitSquareHorizontal, active: true },
+            { name: 'PDF Compressor', path: '/app/pdf-compressor', icon: Minimize2, active: true },
+            { name: 'Image to PDF', path: '/app/image-to-pdf', icon: ImagePlus, active: true },
+            { name: 'PDF to Images', path: '/app/pdf-to-images', icon: FileImage, active: true },
+            { name: 'Resume Parser', path: '/app/resume-parser', icon: FileSearch, active: false },
+            { name: 'Document Translator', path: '/app/document-translator', icon: Globe, active: false },
+        ]
+    },
+    {
+        title: "Utility Hub",
+        description: "Everyday Essential Tools",
+        color: "from-brand-400 to-brand-300",
+        icon: Settings,
+        sectionId: "utility-hub",
+        tools: [
+            { name: 'Currency Converter', path: '/app/currency-converter', icon: Activity, active: true },
+            { name: 'Password Generator', path: '/app/password-generator', icon: Key, active: true },
+            { name: 'Password Strength', path: '/app/password-strength', icon: ShieldCheck, active: true },
+            { name: 'Unit Converter', path: '/app/unit-converter', icon: Scale, active: true },
+            { name: 'Age Calculator', path: '/app/age-calculator', icon: Hourglass, active: true },
+            { name: 'Word Counter', path: '/app/word-counter', icon: Type, active: true },
+            { name: 'Lorem Ipsum Generator', path: '/app/lorem-ipsum', icon: AlignLeft, active: true },
+            { name: 'World Clock', path: '/app/world-clock', icon: Clock, active: true },
+            { name: 'BMI Calculator', path: '/app/bmi-calculator', icon: Scale, active: true },
         ]
     },
     {
@@ -102,45 +155,8 @@ const categories = [
             { name: 'API Tester', path: '/app/api-tester', icon: Zap, active: true },
             { name: 'SQL Formatter', path: '/app/sql-formatter', icon: Database, active: true },
         ]
-    },
-    {
-        title: "Utility Hub",
-        description: "Everyday Essential Tools",
-        color: "from-brand-400 to-brand-300",
-        icon: Settings,
-        sectionId: "utility-hub",
-        tools: [
-            { name: 'Currency Converter', path: '/app/currency-converter', icon: Activity, active: true },
-            { name: 'Password Generator', path: '/app/password-generator', icon: Key, active: true },
-            { name: 'Password Strength', path: '/app/password-strength', icon: ShieldCheck, active: true },
-            { name: 'Unit Converter', path: '/app/unit-converter', icon: Scale, active: true },
-            { name: 'Age Calculator', path: '/app/age-calculator', icon: Hourglass, active: true },
-            { name: 'Word Counter', path: '/app/word-counter', icon: Type, active: true },
-            { name: 'Lorem Ipsum Generator', path: '/app/lorem-ipsum', icon: AlignLeft, active: true },
-            { name: 'World Clock', path: '/app/world-clock', icon: Clock, active: true },
-            { name: 'BMI Calculator', path: '/app/bmi-calculator', icon: Scale, active: true },
-        ]
-    },
-    {
-        title: "Content Creator Suite",
-        description: "Social Media & Marketing",
-        color: "from-brand-500 to-brand-400",
-        icon: Share2,
-        sectionId: "content-creator-suite",
-        tools: [
-            { name: 'Tweet Generator', path: '/app/tweet-generator', icon: MessageSquare, active: true },
-            { name: 'Thread Creator', path: '/app/thread-creator', icon: ListTree, active: true },
-            { name: 'Hashtag Generator', path: '/app/hashtag-generator', icon: Hash, active: true },
-            { name: 'Caption Writer', path: '/app/caption-writer', icon: PenTool, active: true },
-            { name: 'Post Scheduler', path: '/app/post-scheduler', icon: CalendarDays, active: true },
-            { name: 'Analytics Dashboard', path: '/app/analytics', icon: BarChart, active: true },
-            { name: 'Trending Topics', path: '/app/trending', icon: TrendingUp, active: true },
-            { name: 'Auto Poster', path: '/app/auto-poster', icon: Share2, active: true },
-            { name: 'Content Calendar', path: '/app/content-calendar', icon: CalendarDays, active: true },
-        ]
     }
 ];
-
 
 export default function Dashboard() {
     const { user } = useStore();

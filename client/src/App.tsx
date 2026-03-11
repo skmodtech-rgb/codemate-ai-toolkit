@@ -80,6 +80,16 @@ import TrendingTopics from './pages/tools/TrendingTopics';
 import AutoPoster from './pages/tools/AutoPoster';
 import ContentCalendar from './pages/tools/ContentCalendar';
 
+// AI Intelligence Tools
+import AiStudymate from './pages/tools/AiStudymate';
+import ResumeAnalyzer from './pages/tools/ResumeAnalyzer';
+import InterviewBot from './pages/tools/InterviewBot';
+import LiteratureReview from './pages/tools/LiteratureReview';
+import DocumentQA from './pages/tools/DocumentQA';
+import BlogWriter from './pages/tools/BlogWriter';
+import WebsiteSummarizer from './pages/tools/WebsiteSummarizer';
+import IdeaGenerator from './pages/tools/IdeaGenerator';
+
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { user } = useStore();
@@ -182,6 +192,16 @@ function App() {
                     <Route path="trending" element={<TrendingTopics />} />
                     <Route path="auto-poster" element={<AutoPoster />} />
                     <Route path="content-calendar" element={<ContentCalendar />} />
+
+                    {/* AI Intelligence */}
+                    <Route path="ai-studymate" element={<AiStudymate />} />
+                    <Route path="resume-analyzer" element={<ResumeAnalyzer />} />
+                    <Route path="interview-bot" element={<InterviewBot />} />
+                    <Route path="literature-review" element={<LiteratureReview />} />
+                    <Route path="document-qa" element={<DocumentQA />} />
+                    <Route path="blog-writer" element={<BlogWriter />} />
+                    <Route path="website-summarizer" element={<WebsiteSummarizer />} />
+                    <Route path="idea-generator" element={<IdeaGenerator />} />
 
                     {/* Profile & Settings */}
                     <Route path="profile" element={<Profile />} />

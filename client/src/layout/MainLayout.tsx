@@ -11,14 +11,15 @@ import {
     Maximize, Crop, ArrowUpCircle, Film, Camera, Monitor,
     Database, LayoutGrid, Scan, Palette, GitCompare, Globe,
     CheckSquare, Paintbrush, Zap, Activity, Scale, AlignLeft, Clock,
-    Hourglass, ShieldCheck, ExternalLink
+    Hourglass, ShieldCheck, ExternalLink, PenTool, FileSearch,
+    ListTree, CalendarDays, BarChart, TrendingUp, Share2
 } from 'lucide-react';
 import { TbHexagonLetterT } from "react-icons/tb";
 
 // Full tool list per category
 const sidebarCategories = [
     { 
-        title: 'AI Studio',
+        title: 'AI Creator Studio',
         items: [
             { name: 'Image Generator', icon: ImageIcon, path: '/app/image-generator' },
             { name: 'Video Generator', icon: Video, path: '/app/video-generator' },
@@ -29,19 +30,20 @@ const sidebarCategories = [
         ]
     },
     { 
-        title: 'Documents',
+        title: 'AI Intelligence',
         items: [
-            { name: 'PDF Merger', icon: Files, path: '/app/pdf-merger' },
-            { name: 'PDF Splitter', icon: SplitSquareHorizontal, path: '/app/pdf-splitter' },
-            { name: 'Image to PDF', icon: ImagePlus, path: '/app/image-to-pdf' },
-            { name: 'PDF to Word', icon: FileText, path: '/app/pdf-to-word' },
-            { name: 'Word to PDF', icon: File, path: '/app/word-to-pdf' },
-            { name: 'PDF Compressor', icon: Minimize2, path: '/app/pdf-compressor' },
-            { name: 'PDF to Images', icon: FileImage, path: '/app/pdf-to-images' },
+            { name: 'AI StudyMate', icon: FileText, path: '/app/ai-studymate' },
+            { name: 'Resume Analyzer', icon: User, path: '/app/resume-analyzer' },
+            { name: 'Interview Bot', icon: MessageSquare, path: '/app/interview-bot' },
+            { name: 'Lit Review Gen', icon: Files, path: '/app/literature-review' },
+            { name: 'Document Q&A', icon: FileSearch, path: '/app/document-qa' },
+            { name: 'SEO Blog Writer', icon: PenTool, path: '/app/blog-writer' },
+            { name: 'Website Summarizer', icon: Globe, path: '/app/website-summarizer' },
+            { name: 'Idea Generator', icon: Zap, path: '/app/idea-generator' },
         ]
     },
     { 
-        title: 'Media',
+        title: 'Media Studio',
         items: [
             { name: 'Image Compressor', icon: Minimize2, path: '/app/image-compressor' },
             { name: 'BG Remover', icon: Scissors, path: '/app/bg-remover' },
@@ -55,8 +57,48 @@ const sidebarCategories = [
             { name: 'Webcam Recorder', icon: MonitorPlay, path: '/app/webcam-recorder' },
         ]
     },
+    {
+        title: 'Content Creator Suite',
+        items: [
+            { name: 'Tweet Generator', icon: MessageSquare, path: '/app/tweet-generator' },
+            { name: 'Thread Creator', icon: ListTree, path: '/app/thread-creator' },
+            { name: 'Hashtag Generator', icon: HashIcon, path: '/app/hashtag-generator' },
+            { name: 'Caption Writer', icon: PenTool, path: '/app/caption-writer' },
+            { name: 'Post Scheduler', icon: CalendarDays, path: '/app/post-scheduler' },
+            { name: 'Analytics Dashboard', icon: BarChart, path: '/app/analytics' },
+            { name: 'Trending Topics', icon: TrendingUp, path: '/app/trending' },
+            { name: 'Auto Poster', icon: Share2, path: '/app/auto-poster' },
+            { name: 'Content Calendar', icon: CalendarDays, path: '/app/content-calendar' },
+        ]
+    },
     { 
-        title: 'Data',
+        title: 'Document Workshop',
+        items: [
+            { name: 'PDF Merger', icon: Files, path: '/app/pdf-merger' },
+            { name: 'PDF Splitter', icon: SplitSquareHorizontal, path: '/app/pdf-splitter' },
+            { name: 'Image to PDF', icon: ImagePlus, path: '/app/image-to-pdf' },
+            { name: 'PDF to Word', icon: FileText, path: '/app/pdf-to-word' },
+            { name: 'Word to PDF', icon: File, path: '/app/word-to-pdf' },
+            { name: 'PDF Compressor', icon: Minimize2, path: '/app/pdf-compressor' },
+            { name: 'PDF to Images', icon: FileImage, path: '/app/pdf-to-images' },
+        ]
+    },
+    { 
+        title: 'Utility Hub',
+        items: [
+            { name: 'Currency Converter', icon: Activity, path: '/app/currency-converter' },
+            { name: 'Password Generator', icon: Key, path: '/app/password-generator' },
+            { name: 'Password Strength', icon: ShieldCheck, path: '/app/password-strength' },
+            { name: 'Unit Converter', icon: Scale, path: '/app/unit-converter' },
+            { name: 'Age Calculator', icon: Hourglass, path: '/app/age-calculator' },
+            { name: 'Word Counter', icon: Type, path: '/app/word-counter' },
+            { name: 'Lorem Ipsum Generator', icon: AlignLeft, path: '/app/lorem-ipsum' },
+            { name: 'World Clock', icon: Clock, path: '/app/world-clock' },
+            { name: 'BMI Calculator', icon: Scale, path: '/app/bmi-calculator' },
+        ]
+    },
+    { 
+        title: 'Data Intelligence',
         items: [
             { name: 'JSON Formatter', icon: Code, path: '/app/json-formatter' },
             { name: 'JSON to CSV', icon: RefreshCw, path: '/app/json-to-csv' },
@@ -70,7 +112,7 @@ const sidebarCategories = [
         ]
     },
     { 
-        title: 'Dev Tools',
+        title: 'Developer Toolkit',
         items: [
             { name: 'Base64 Encoder', icon: Binary, path: '/app/base64' },
             { name: 'Hash Generator', icon: HashIcon, path: '/app/hash-generator' },
@@ -81,20 +123,6 @@ const sidebarCategories = [
             { name: 'JS Minifier', icon: Code, path: '/app/js-minifier' },
             { name: 'API Tester', icon: Zap, path: '/app/api-tester' },
             { name: 'SQL Formatter', icon: Database, path: '/app/sql-formatter' },
-        ]
-    },
-    { 
-        title: 'Utilities',
-        items: [
-            { name: 'Currency Converter', icon: Activity, path: '/app/currency-converter' },
-            { name: 'Password Generator', icon: Key, path: '/app/password-generator' },
-            { name: 'Password Strength', icon: ShieldCheck, path: '/app/password-strength' },
-            { name: 'Unit Converter', icon: Scale, path: '/app/unit-converter' },
-            { name: 'Age Calculator', icon: Hourglass, path: '/app/age-calculator' },
-            { name: 'Word Counter', icon: Type, path: '/app/word-counter' },
-            { name: 'Lorem Ipsum', icon: AlignLeft, path: '/app/lorem-ipsum' },
-            { name: 'World Clock', icon: Clock, path: '/app/world-clock' },
-            { name: 'BMI Calculator', icon: Scale, path: '/app/bmi-calculator' },
         ]
     },
 ];
