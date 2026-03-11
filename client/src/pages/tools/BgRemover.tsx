@@ -63,14 +63,15 @@ export default function BgRemover() {
                         if (obj.startsWith('http') || obj.startsWith('data:image')) return obj;
                         // Check if it's a raw base64 string
                         const trimmed = obj.trim();
-                        if (trimmed.length > 500 && /^[A-Za-z0-9+/=]+$/.test(trimmed.substring(0, 100))) {
+                        const raw = trimmed.replace(/\s/g, '');
+                        if (raw.length > 500 && /^[A-Za-z0-9+/=]+$/.test(raw.substring(0, 100))) {
                             // Detect image type from base64 header
                             let type = 'png';
-                            if (trimmed.startsWith('UklGR')) type = 'webp';
-                            else if (trimmed.startsWith('/9j/')) type = 'jpeg';
-                            else if (trimmed.startsWith('iVBORw')) type = 'png';
+                            if (raw.startsWith('UklGR')) type = 'webp';
+                            else if (raw.startsWith('/9j/')) type = 'jpeg';
+                            else if (raw.startsWith('iVBORw')) type = 'png';
                             
-                            return `data:image/${type};base64,${trimmed}`;
+                            return `data:image/${type};base64,${raw}`;
                         }
                         return null;
                     }
@@ -119,13 +120,13 @@ export default function BgRemover() {
                 setResultUrl(objectUrl);
             } else if (text.startsWith('http') || text.startsWith('data:image')) {
                 setResultUrl(text.trim());
-            } else if (text.length > 500 && /^[A-Za-z0-9+/=]+$/.test(text.trim().substring(0, 100))) {
-                const trimmed = text.trim();
+            } else if (text.length > 500 || /^[A-Za-z0-9+/=]+$/.test(text.trim().substring(0, 100))) {
+                const raw = text.trim().replace(/\s/g, '');
                 let type = 'png';
-                if (trimmed.startsWith('UklGR')) type = 'webp';
-                else if (trimmed.startsWith('/9j/')) type = 'jpeg';
-                else if (trimmed.startsWith('iVBORw')) type = 'png';
-                setResultUrl(`data:image/${type};base64,${trimmed}`);
+                if (raw.startsWith('UklGR')) type = 'webp';
+                else if (raw.startsWith('/9j/')) type = 'jpeg';
+                else if (raw.startsWith('iVBORw')) type = 'png';
+                setResultUrl(`data:image/${type};base64,${raw}`);
             } else {
                 const blob = new Blob([res.data], { type: 'image/png' });
                 const objectUrl = URL.createObjectURL(blob);
@@ -235,18 +236,18 @@ export default function BgRemover() {
                             </div>
                         ) : resultUrl ? (
                             <div className="w-full h-full flex flex-col items-center justify-between gap-4 py-2">
-                                <div className="flex-1 relative rounded-xl overflow-hidden shadow-2xl flex items-center justify-center w-full min-h-[300px] bg-accent/20">
+                                <div className="w-full flex-1 relative rounded-xl overflow-hidden shadow-2xl flex items-center justify-center bg-accent/20 min-h-[350px]">
                                     <div className="absolute inset-0 z-0 bg-white" style={{backgroundImage: 'repeating-linear-gradient(45deg, #e5e7eb 25%, transparent 25%, transparent 75%, #e5e7eb 75%, #e5e7eb), repeating-linear-gradient(45deg, #e5e7eb 25%, #ffffff 25%, #ffffff 75%, #e5e7eb 75%, #e5e7eb)', backgroundPosition: '0 0, 10px 10px', backgroundSize: '15px 15px'}}></div>
                                     <img 
                                         src={resultUrl} 
                                         alt="Background removed" 
-                                        className="max-w-full max-h-[450px] relative z-20 object-contain drop-shadow-2xl"
+                                        className="max-w-full max-h-[500px] w-auto h-auto relative z-20 object-contain drop-shadow-2xl"
                                         onError={(e) => {
                                             console.error("Image load error", e);
                                         }}
                                     />
                                 </div>
-                                <div className="w-full flex gap-3 mt-auto relative z-30">
+                                <div className="w-full flex gap-3 mt-4 relative z-30">
                                     <button 
                                         onClick={() => setResultUrl(null)}
                                         className="btn-secondary flex-1 h-12"
@@ -257,7 +258,7 @@ export default function BgRemover() {
                                         onClick={handleDownload}
                                         className="btn-primary flex-[2] h-12 bg-gradient-to-r from-emerald-600 to-emerald-500 shadow-emerald-500/20"
                                     >
-                                        <Download className="w-4 h-4" /> Download HD Image
+                                        <Download className="w-4 h-4" /> Download Result
                                     </button>
                                 </div>
                             </div>

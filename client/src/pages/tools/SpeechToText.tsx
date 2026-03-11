@@ -38,8 +38,9 @@ export default function SpeechToText() {
         setResultText(null);
 
         try {
+            const audioData = file!.data.includes(',') ? file!.data.split(',')[1] : file!.data;
             const payload = inputType === 'file' 
-                ? { audio: file!.data, fileName: file!.name }
+                ? { audio: audioData, fileName: file!.name }
                 : { url };
 
             const token = JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token;
