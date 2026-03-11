@@ -68,7 +68,12 @@ const handleRemoveBg = async () => {
                 const findImage = (obj: any): string | null => {
                     if (!obj) return null;
                     if (typeof obj === 'string') {
-                        if (obj.startsWith('http') || obj.startsWith('data:image')) return obj;
+                        // Fix for n8n mislabeling image as application/json
+                        if (obj.startsWith('data:application/json;base64,')) {
+                            return obj.replace('data:application/json;base64,', 'data:image/png;base64,');
+                        }
+                        if (obj.startsWith('http') || obj.startsWith('data:')) return obj;
+                        
                         // Check if it's a raw base64 string
                         const trimmed = obj.trim().replace(/\s/g, '');
                         if (trimmed.length > 500 && /^[A-Za-z0-9+/=]+$/.test(trimmed.substring(0, 100))) {
@@ -86,7 +91,8 @@ const handleRemoveBg = async () => {
                             if (found) return found;
                         }
                     } else if (typeof obj === 'object') {
-                        const imageFields = ['image_file_b64', 'source_image_base64', 'imageUrl', 'image', 'url', 'output', 'result', 'data', 'response'];
+                        // Added 'image_base64' as found in n8n screenshot
+                        const imageFields = ['image_base64', 'image_file_b64', 'source_image_base64', 'imageUrl', 'image', 'url', 'output', 'result', 'data', 'response'];
                         for (const field of imageFields) {
                             if (obj[field]) {
                                 const found = findImage(obj[field]);

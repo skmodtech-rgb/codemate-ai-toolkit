@@ -130,7 +130,7 @@ export const removeBackground = async (req: Request, res: Response) => {
             message = error.message || message;
         }
 
-        res.status(statusCode).json({ success: false, message });
+        res.status(statusCode).json({ success: false, message, debug: error.response?.headers });
     }
 };
 
