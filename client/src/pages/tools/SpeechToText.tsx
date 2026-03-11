@@ -48,7 +48,7 @@ export default function SpeechToText() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
-            const text = res.data?.transcript || res.data?.text || res.data?.output || res.data;
+            const text = res.data?.transcript || res.data?.text || res.data?.output || res.data?.result || res.data?.data?.transcript || res.data?.data?.text;
             if (typeof text === 'string') {
                 setResultText(text);
             } else if (typeof text === 'object') {
