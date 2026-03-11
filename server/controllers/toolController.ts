@@ -90,6 +90,9 @@ export const utilityGeneric = async (req: Request, res: Response) => {
 
 // --- Background Remover (Proxy to avoid CORS) ---
 export const removeBackground = async (req: Request, res: Response) => {
+    // Explicit CORS for the specific endpoint to ensure error responses are visible
+    res.header('Access-Control-Allow-Origin', '*');
+    
     try {
         const endpoint = process.env.N8N_BG_REMOVER_ENDPOINT || 'https://cmpunktg7.app.n8n.cloud/webhook/remove-bg';
         
@@ -107,19 +110,27 @@ export const removeBackground = async (req: Request, res: Response) => {
         const contentType = response.headers['content-type'] || 'image/png';
         res.set('Content-Type', contentType);
         
-        // Use Buffer.from to ensure consistent binary delivery in Node.js
-        res.send(Buffer.from(response.data));
+        // Use Buffer.from to ensure consistent binary delivery
+        const buffer = Buffer.from(response.data);
+        res.status(200).send(buffer);
     } catch (error: any) {
         console.error('BG Remover Error:', error.message);
-        let message = error.message || 'Background removal failed';
+        let message = 'Background removal failed. Please check the image or try again.';
+        let statusCode = 500;
+
         if (error.response?.data) {
             try {
+                // Try decoding potential error JSON from buffer
                 const text = new TextDecoder().decode(error.response.data);
                 const json = JSON.parse(text);
                 message = json.message || message;
-            } catch (e) { /* ignore */ }
+                statusCode = error.response.status || 500;
+            } catch (e) { /* use default message if not json */ }
+        } else {
+            message = error.message || message;
         }
-        res.status(500).json({ success: false, message });
+
+        res.status(statusCode).json({ success: false, message });
     }
 };
 
