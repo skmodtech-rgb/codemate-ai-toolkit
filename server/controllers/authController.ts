@@ -10,23 +10,22 @@ export const authUser = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
 
-        // Mock login fallback for demo
-        if (process.env.MONGODB_URI === 'YOUR_MONGO_DB_URL' || !process.env.MONGODB_URI) {
-            if (email === 'demo@toolmate.ai' && password === 'demo123') {
-                return res.json({
-                    _id: 'mock_id_123',
-                    name: 'Demo User',
-                    email: 'demo@toolmate.ai',
-                    isEmailVerified: true,
-                    token: generateToken('mock_id_123'),
-                });
-            }
+        // Mock login fallback for demo - always allow demo account
+        if (email === 'demo@toolmate.ai' && password === 'demo123') {
+            return res.json({
+                _id: 'mock_id_123',
+                name: 'Demo User',
+                email: 'demo@toolmate.ai',
+                isEmailVerified: true,
+                token: generateToken('mock_id_123'),
+            });
         }
 
         const user: any = await User.findOne({ email });
 
         if (user && (await user.matchPassword(password))) {
-            if (!user.isEmailVerified && process.env.MONGODB_URI !== 'YOUR_MONGO_DB_URL') {
+            const isEmailConfigured = process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD;
+            if (!user.isEmailVerified && isEmailConfigured && process.env.MONGODB_URI !== 'YOUR_MONGO_DB_URL') {
                 res.status(401);
                 throw new Error('Please verify your email address to login. Check your inbox.');
             }
@@ -42,6 +41,7 @@ export const authUser = async (req: Request, res: Response) => {
             throw new Error('Invalid email or password');
         }
     } catch (error: any) {
+        console.error('Login error:', error);
         res.status(401).json({ message: error.message || 'Error occurred' });
     }
 };
@@ -75,11 +75,12 @@ export const registerUser = async (req: Request, res: Response) => {
         const verificationToken = generateVerificationToken();
         const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
+        const isEmailConfigured = process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD;
         const user = await User.create({
             name,
             email,
             password,
-            isEmailVerified: false,
+            isEmailVerified: !isEmailConfigured, // Auto-verify if no email config
             emailVerificationToken: verificationToken,
             emailVerificationExpires: verificationExpires,
         });
@@ -92,8 +93,8 @@ export const registerUser = async (req: Request, res: Response) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                isEmailVerified: false,
-                verificationSent: true,
+                isEmailVerified: user.isEmailVerified,
+                verificationSent: !!isEmailConfigured,
                 token: generateToken(user._id),
             });
         } else {
@@ -101,6 +102,7 @@ export const registerUser = async (req: Request, res: Response) => {
             throw new Error('Invalid user data');
         }
     } catch (error: any) {
+        console.error('Registration error:', error);
         res.status(400).json({ message: error.message || 'Error occurred' });
     }
 };

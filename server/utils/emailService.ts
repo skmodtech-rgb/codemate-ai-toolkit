@@ -17,8 +17,16 @@ const createTransporter = () => {
 };
 
 export const sendVerificationEmail = async (email: string, token: string): Promise<void> => {
-    const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email?token=${token}`;
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const verificationUrl = `${clientUrl}/verify-email?token=${token}`;
     
+    // Check if email credentials are configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+        console.warn('⚠️ EMAIL_USER or EMAIL_APP_PASSWORD not set in .env. Skipping verification email.');
+        console.warn(`📩 In production, send this link to the user: ${verificationUrl}`);
+        return;
+    }
+
     const transporter = createTransporter();
 
     const mailOptions = {
@@ -74,6 +82,8 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
         console.log(`✅ Verification email sent to ${email}`);
     } catch (err) {
         console.error(`❌ Failed to send verification email to ${email}:`, err);
-        throw new Error('Failed to send verification email. Please try again later.');
+        // Don't throw the error, just log it so registration can continue
+        console.warn('⚠️ Application is continuing registration despite email failure.');
     }
 };
+

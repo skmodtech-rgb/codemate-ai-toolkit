@@ -91,13 +91,8 @@ export const utilityGeneric = async (req: Request, res: Response) => {
 // --- Background Remover (Proxy to avoid CORS) ---
 export const removeBackground = async (req: Request, res: Response) => {
     try {
-        const endpoint = process.env.N8N_BG_REMOVER_ENDPOINT;
-        
-        if (!endpoint) {
-            // Mock empty response if endpoint is missing for demo purposes
-            res.status(400);
-            throw new Error('N8N_BG_REMOVER_ENDPOINT is not configured.');
-        }
+        const baseUrl = process.env.N8N_CHATBOT_ENDPOINT?.split('/webhook/')[0] || 'https://cmpunktg6.app.n8n.cloud';
+        const endpoint = process.env.N8N_BG_REMOVER_ENDPOINT || `${baseUrl}/webhook/remove-background`;
 
         const response = await axios.post(endpoint as string, req.body, {
             responseType: 'arraybuffer', // Important to handle both binary and JSON
@@ -132,7 +127,9 @@ export const removeBackground = async (req: Request, res: Response) => {
 export const n8nProxy = async (req: Request, res: Response) => {
     const { action } = req.params;
     try {
-        const endpoint = `https://cmpunktg7.app.n8n.cloud/webhook/${action}`;
+        // Use the base URL from one of the defined endpoints if possible
+        const baseUrl = process.env.N8N_CHATBOT_ENDPOINT?.split('/webhook/')[0] || 'https://cmpunktg6.app.n8n.cloud';
+        const endpoint = `${baseUrl}/webhook/${action}`;
         
         const response = await axios.post(endpoint, req.body, {
             timeout: 120000,
@@ -141,6 +138,7 @@ export const n8nProxy = async (req: Request, res: Response) => {
 
         res.json(response.data);
     } catch (error: any) {
+        console.error(`Proxy error for ${action}:`, error.message);
         let message = error.response?.data?.message || error.response?.data || error.message || 'Action failed';
         res.status(500).json({ success: false, message: typeof message === 'string' ? message : 'Action failed' });
     }
