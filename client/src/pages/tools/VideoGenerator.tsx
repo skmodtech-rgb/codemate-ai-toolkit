@@ -24,18 +24,63 @@ export default function VideoGenerator() {
         try {
             const token = JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token;
             const res = await axios.post(ENDPOINTS[model], { prompt }, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'arraybuffer',
+                timeout: 180000, // 3 minutes for video
             });
-            const url = res.data?.videoUrl || res.data?.video || res.data?.url || res.data?.output || res.data?.data?.video_url || res.data?.data?.url;
-            if (url) {
-                setResultUrl(url);
-            } else if (typeof res.data === 'string' && res.data.startsWith('http')) {
-                setResultUrl(res.data);
+
+            const text = new TextDecoder().decode(res.data);
+            let parsedJson: any = null;
+            try {
+                parsedJson = JSON.parse(text);
+            } catch (e) { /* Not JSON */ }
+
+            const findUrl = (obj: any): string | null => {
+                if (!obj) return null;
+                if (typeof obj === 'string') {
+                    if (obj.startsWith('http') || obj.startsWith('data:')) return obj;
+                    // Check if base64 video
+                    const trimmed = obj.trim().replace(/\s/g, '');
+                    if (trimmed.length > 5000 && /^[A-Za-z0-9+/=]+$/.test(trimmed.substring(0, 100))) {
+                        return `data:video/mp4;base64,${trimmed}`;
+                    }
+                    return null;
+                }
+                if (Array.isArray(obj)) {
+                    for (const item of obj) {
+                        const v = findUrl(item);
+                        if (v) return v;
+                    }
+                } else if (typeof obj === 'object') {
+                    const keys = ['videoUrl', 'video', 'url', 'output', 'result', 'data', 'generated_video', 'video_base64'];
+                    for (const k of keys) {
+                        const v = findUrl(obj[k]);
+                        if (v) return v;
+                    }
+                    for (const k in (obj as any)) {
+                        const v = findUrl((obj as any)[k]);
+                        if (v) return v;
+                    }
+                }
+                return null;
+            };
+
+            const videoUrl = findUrl(parsedJson);
+            if (videoUrl) {
+                setResultUrl(videoUrl);
             } else {
-                setError('Unexpected response format. Please try again.');
+                const contentType = res.headers['content-type'] || 'video/mp4';
+                if (contentType.includes('video')) {
+                    const blob = new Blob([res.data], { type: contentType });
+                    setResultUrl(URL.createObjectURL(blob));
+                } else if (text.startsWith('http')) {
+                    setResultUrl(text.trim());
+                } else {
+                    setError('The video is rendered but I could not resolve the download link.');
+                }
             }
         } catch (err: any) {
-            setError(err.response?.data?.message || err.message || 'An error occurred.');
+             setError(err.response?.data ? new TextDecoder().decode(err.response.data) : (err.message || 'An error occurred.'));
         } finally {
             setLoading(false);
         }

@@ -45,41 +45,31 @@ export default function YoutubeTranscriber() {
             });
             
             // Handle various response formats
-            const data = res.data;
-            
-            if (typeof data === 'string') {
-                setResultText(data);
-            } else if (Array.isArray(data)) {
-                // Could be an array of transcript segments
-                const text = data.map((item: any) => {
-                    if (typeof item === 'string') return item;
-                    return item?.text || item?.content || item?.transcript || JSON.stringify(item);
-                }).join('\n\n');
-                setResultText(text);
-            } else if (typeof data === 'object' && data !== null) {
-                // Try common response keys
-                const text = data.transcript || data.text || data.output || data.result || data.content || data.transcription;
-                if (typeof text === 'string') {
-                    setResultText(text);
-                } else if (Array.isArray(text)) {
-                    const joined = text.map((item: any) => {
-                        if (typeof item === 'string') return item;
-                        return item?.text || item?.content || JSON.stringify(item);
-                    }).join('\n\n');
-                    setResultText(joined);
-                } else if (data.data) {
-                    // Nested data
-                    if (typeof data.data === 'string') {
-                        setResultText(data.data);
-                    } else {
-                        setResultText(JSON.stringify(data.data, null, 2));
-                    }
-                } else {
-                    // Last resort: pretty-print the JSON
-                    setResultText(JSON.stringify(data, null, 2));
+            const findText = (obj: any): string | null => {
+                if (!obj) return null;
+                if (typeof obj === 'string') return obj;
+                if (Array.isArray(obj)) {
+                    return obj.map(item => findText(item)).filter(Boolean).join('\n\n');
                 }
+                if (typeof obj === 'object') {
+                    const keys = ['transcript', 'text', 'output', 'result', 'content', 'transcription', 'data'];
+                    for (const k of keys) {
+                        const v = findText(obj[k]);
+                        if (v) return v;
+                    }
+                    for (const k in obj) {
+                        const v = findText(obj[k]);
+                        if (v) return v;
+                    }
+                }
+                return null;
+            };
+
+            const text = findText(res.data);
+            if (text) {
+                setResultText(text);
             } else {
-                setError('Unexpected response format. Please try again.');
+                setError('Could not extract transcription from response.');
             }
         } catch (err: any) {
             if (err.code === 'ECONNABORTED') {

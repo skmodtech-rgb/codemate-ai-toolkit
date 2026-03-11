@@ -25,19 +25,65 @@ export default function ImageGenerator() {
         try {
             const token = JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token;
             const res = await axios.post(ENDPOINTS[model], { prompt }, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'arraybuffer', // Ensure we can handle binary/base64
+                timeout: 120000,
             });
-            // n8n webhook may return the image URL in different formats
-            const url = res.data?.imageUrl || res.data?.image || res.data?.url || res.data?.output || res.data?.generated_image || res.data?.data?.imageUrl;
-            if (url) {
-                setResultUrl(url);
-            } else if (typeof res.data === 'string' && res.data.startsWith('http')) {
-                setResultUrl(res.data);
+
+            // Decode the response and try to find an image
+            const text = new TextDecoder().decode(res.data);
+            let parsedJson: any = null;
+            try {
+                parsedJson = JSON.parse(text);
+            } catch (e) { /* Not JSON */ }
+
+            const findUrl = (obj: any): string | null => {
+                if (!obj) return null;
+                if (typeof obj === 'string') {
+                    if (obj.startsWith('http') || obj.startsWith('data:')) return obj;
+                    // Check if it's a raw base64 string
+                    const trimmed = obj.trim().replace(/\s/g, '');
+                    if (trimmed.length > 500 && /^[A-Za-z0-9+/=]+$/.test(trimmed.substring(0, 100))) {
+                        return `data:image/png;base64,${trimmed}`;
+                    }
+                    return null;
+                }
+                if (Array.isArray(obj)) {
+                    for (const item of obj) {
+                        const v = findUrl(item);
+                        if (v) return v;
+                    }
+                } else if (typeof obj === 'object') {
+                    const keys = ['imageUrl', 'image', 'url', 'output', 'result', 'data', 'generated_image', 'image_base64', 'result_b64'];
+                    for (const k of keys) {
+                        const v = findUrl(obj[k]);
+                        if (v) return v;
+                    }
+                    for (const k in obj) {
+                        const v = findUrl(obj[k]);
+                        if (v) return v;
+                    }
+                }
+                return null;
+            };
+
+            const imageUrl = findUrl(parsedJson);
+            if (imageUrl) {
+                setResultUrl(imageUrl);
             } else {
-                setError('Unexpected response format. Please try again.');
+                // Try blob as fallback
+                const contentType = res.headers['content-type'] || 'image/png';
+                if (contentType.includes('image')) {
+                    const blob = new Blob([res.data], { type: contentType });
+                    setResultUrl(URL.createObjectURL(blob));
+                } else if (text.startsWith('http')) {
+                    setResultUrl(text.trim());
+                } else {
+                    setError('Detected successful request but could not resolve image output.');
+                }
             }
         } catch (err: any) {
-            setError(err.response?.data?.message || err.message || 'An error occurred.');
+            setError(err.response?.data ? new TextDecoder().decode(err.response.data) : (err.message || 'An error occurred.'));
         } finally {
             setLoading(false);
         }

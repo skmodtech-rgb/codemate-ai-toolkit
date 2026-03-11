@@ -45,16 +45,36 @@ export default function SpeechToText() {
 
             const token = JSON.parse(localStorage.getItem('toolmate_user') || '{}')?.token;
             const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/proxy/transcribe-audio`, payload, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
+                timeout: 120000
             });
             
-            const text = res.data?.transcript || res.data?.text || res.data?.output || res.data?.result || res.data?.data?.transcript || res.data?.data?.text;
-            if (typeof text === 'string') {
+            const findText = (obj: any): string | null => {
+                if (!obj) return null;
+                if (typeof obj === 'string') return obj;
+                if (Array.isArray(obj)) {
+                    return obj.map(item => findText(item)).filter(Boolean).join('\n\n');
+                }
+                if (typeof obj === 'object') {
+                    const keys = ['transcript', 'text', 'output', 'result', 'content', 'transcription', 'data'];
+                    for (const k of keys) {
+                        const v = findText(obj[k]);
+                        if (v) return v;
+                    }
+                    // Deep search all keys
+                    for (const k in obj) {
+                        const v = findText(obj[k]);
+                        if (v) return v;
+                    }
+                }
+                return null;
+            };
+
+            const text = findText(res.data);
+            if (text) {
                 setResultText(text);
-            } else if (typeof text === 'object') {
-                setResultText(JSON.stringify(text, null, 2));
             } else {
-                setError('Unexpected response format. Please try again.');
+                setError('Could not extract transcription from response.');
             }
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || 'An error occurred during transcription.');

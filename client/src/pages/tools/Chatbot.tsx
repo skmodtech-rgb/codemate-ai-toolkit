@@ -23,6 +23,7 @@ interface Message {
     id: string;
     role: 'user' | 'assistant';
     content: string;
+    image?: string;
 }
 
 export default function Chatbot() {
@@ -65,52 +66,59 @@ export default function Chatbot() {
 
             const responseData = Array.isArray(res.data) ? res.data[0] : res.data;
             
-            const extractContent = (data: any): string => {
-                if (!data) return '';
-                if (typeof data === 'string') {
-                    // Check if it's a huge base64 string
-                    if (data.length > 1000 && !data.includes(' ')) return "I've generated the data for you. [Media Output]";
-                    return data;
-                }
-                
-                // Recursively look for 'text', 'reply', 'content' or 'output'
-                const lookDeep = (obj: any): string | null => {
-                    if (!obj) return null;
-                    if (typeof obj === 'string') return obj;
+            const extractContent = (data: any): { text?: string; image?: string } => {
+                const findMedia = (obj: any): { text?: string; image?: string } => {
+                    if (!obj) return {};
+                    if (typeof obj === 'string') {
+                        if (obj.startsWith('data:image')) return { image: obj };
+                        const trimmed = obj.trim().replace(/\s/g, '');
+                        if (trimmed.length > 1000 && /^[A-Za-z0-9+/=]+$/.test(trimmed.substring(0, 50))) {
+                             return { image: `data:image/png;base64,${trimmed}` };
+                        }
+                        return { text: obj };
+                    }
                     
-                    const keys = ['text', 'reply', 'content', 'message', 'output', 'response', 'result'];
+                    const keys = ['text', 'reply', 'content', 'message', 'output', 'response', 'result', 'image', 'image_base64', 'result_b64'];
+                    let bestText = '';
+                    let bestImage = '';
+
                     for (const key of keys) {
                         if (obj[key]) {
-                            const res = lookDeep(obj[key]);
-                            if (res) return res;
+                            const found = findMedia(obj[key]);
+                            if (found.image) bestImage = found.image;
+                            if (found.text) bestText = found.text;
                         }
                     }
 
-                    // Handle OpenAI-style message objects
-                    if (obj.choices?.[0]?.message?.content) return obj.choices[0].message.content;
+                    if (obj.choices?.[0]?.message?.content) bestText = obj.choices[0].message.content;
                     
-                    return null;
+                    return { text: bestText, image: bestImage };
                 };
 
-                return lookDeep(data) || JSON.stringify(data, null, 2);
+                const result = findMedia(data);
+                return { 
+                    text: result.text || (typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data)),
+                    image: result.image
+                };
             };
 
-            const replyText = extractContent(responseData);
+            const extracted = extractContent(responseData);
 
-            if (replyText) {
+            if (extracted.text || extracted.image) {
                 setMessages(prev => [...prev, {
                     id: Date.now().toString() + 'bot',
                     role: 'assistant',
-                    content: replyText
+                    content: extracted.text || '',
+                    image: extracted.image
                 }]);
             } else {
                 throw new Error("Invalid response format");
             }
-        } catch (error) {
+        } catch (error: any) {
             setMessages(prev => [...prev, {
                 id: Date.now().toString() + 'err',
                 role: 'assistant',
-                content: 'I encountered an error connecting to the API. Please check your network or configuration.'
+                content: error.message || 'I encountered an error connecting to the API.'
             }]);
         } finally {
             setLoading(false);
@@ -205,7 +213,17 @@ export default function Chatbot() {
                                             ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/10 rounded-tr-sm' 
                                             : 'bg-accent/80 border border-border text-foreground shadow-sm rounded-tl-sm prose dark:prose-invert max-w-none'
                                     }`}>
-                                        {msg.content}
+                                        {msg.image && (
+                                            <div className="mb-3 rounded-xl overflow-hidden border border-border/50 shadow-inner bg-black/5">
+                                                <img 
+                                                    src={msg.image} 
+                                                    alt="AI Generated" 
+                                                    className="w-full h-auto max-h-[300px] object-contain cursor-zoom-in" 
+                                                    onClick={() => window.open(msg.image, '_blank')} 
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="whitespace-pre-wrap">{msg.content}</div>
                                     </div>
                                 </div>
                             </motion.div>
