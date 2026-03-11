@@ -12,11 +12,11 @@ const PROVIDERS = [
 ];
 
 const MODELS: Record<string, string[]> = {
-    'OpenAI': ['openai/o3', 'openai/gpt-5.1-instant'],
-    'Anthropic': ['anthropic/claude-opus-4.1', 'anthropic/claude-sonnet-4.5'],
-    'Google': ['google/gemini-3-pro-preview', 'google/gemini-2.5-pro'],
-    'xAI': ['xai/grok-4'],
-    'Perplexity': ['perplexity/sonar-pro']
+    'OpenAI': ['gpt-4o', 'gpt-4o-mini'],
+    'Anthropic': ['claude-3-5-sonnet-latest', 'claude-3-opus-latest'],
+    'Google': ['gemini-2.0-flash', 'gemini-1.5-pro'],
+    'xAI': ['grok-2'],
+    'Perplexity': ['sonar-pro']
 };
 
 interface Message {
@@ -31,8 +31,8 @@ export default function Chatbot() {
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-    const [provider, setProvider] = useState('OpenAI');
-    const [model, setModel] = useState('openai/o3');
+    const [provider, setProvider] = useState('Google');
+    const [model, setModel] = useState('gemini-2.0-flash');
     
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -67,31 +67,32 @@ export default function Chatbot() {
             
             const extractContent = (data: any): string => {
                 if (!data) return '';
-                if (typeof data === 'string') return data;
+                if (typeof data === 'string') {
+                    // Check if it's a huge base64 string
+                    if (data.length > 1000 && !data.includes(' ')) return "I've generated the data for you. [Media Output]";
+                    return data;
+                }
                 
-                // Known deep structures from webhook
-                if (data.response?.data?.choices?.[0]?.message?.content) {
-                    return data.response.data.choices[0].message.content;
-                }
-                if (data.response?.choices?.[0]?.message?.content) {
-                    return data.response.choices[0].message.content;
-                }
-                if (data.data?.choices?.[0]?.message?.content) {
-                    return data.data.choices[0].message.content;
-                }
-                if (data.choices?.[0]?.message?.content) {
-                    return data.choices[0].message.content;
-                }
-                if (typeof data.reply === 'string') {
-                    return data.reply;
-                }
-                if (data.reply?.content) {
-                    return data.reply.content;
-                }
-                if (data.response?.content) {
-                    return data.response.content;
-                }
-                return JSON.stringify(data, null, 2);
+                // Recursively look for 'text', 'reply', 'content' or 'output'
+                const lookDeep = (obj: any): string | null => {
+                    if (!obj) return null;
+                    if (typeof obj === 'string') return obj;
+                    
+                    const keys = ['text', 'reply', 'content', 'message', 'output', 'response', 'result'];
+                    for (const key of keys) {
+                        if (obj[key]) {
+                            const res = lookDeep(obj[key]);
+                            if (res) return res;
+                        }
+                    }
+
+                    // Handle OpenAI-style message objects
+                    if (obj.choices?.[0]?.message?.content) return obj.choices[0].message.content;
+                    
+                    return null;
+                };
+
+                return lookDeep(data) || JSON.stringify(data, null, 2);
             };
 
             const replyText = extractContent(responseData);

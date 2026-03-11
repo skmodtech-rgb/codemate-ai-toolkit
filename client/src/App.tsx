@@ -8,7 +8,6 @@ import MainLayout from './layout/MainLayout';
 // Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
@@ -67,7 +66,6 @@ import SqlFormatter from './pages/tools/SqlFormatter';
 import GenericTool from './pages/tools/GenericTool';
 import Profile from './pages/tools/Profile';
 import ChangePassword from './pages/tools/ChangePassword';
-import VerifyEmail from './pages/VerifyEmail';
 
 // Social Media Tools
 import TweetGenerator from './pages/tools/TweetGenerator';
@@ -115,8 +113,6 @@ function App() {
                 
                 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/verify-email" element={<VerifyEmail />} />
 
                 {/* Secure App / Dashboard Routes */}
                 <Route path="/app" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>

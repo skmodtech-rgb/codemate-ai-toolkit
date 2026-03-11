@@ -24,149 +24,23 @@ export const authUser = async (req: Request, res: Response) => {
         const user: any = await User.findOne({ email });
 
         if (user && (await user.matchPassword(password))) {
-            const isEmailConfigured = process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD;
-            if (!user.isEmailVerified && isEmailConfigured && process.env.MONGODB_URI !== 'YOUR_MONGO_DB_URL') {
-                res.status(401);
-                throw new Error('Please verify your email address to login. Check your inbox.');
-            }
             res.json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                isEmailVerified: user.isEmailVerified,
+                isEmailVerified: true,
                 token: generateToken(user._id),
             });
         } else {
-            res.status(401);
-            throw new Error('Invalid email or password');
+            res.status(401).json({ message: 'Invalid email or password' });
         }
     } catch (error: any) {
         console.error('Login error:', error);
-        res.status(401).json({ message: error.message || 'Error occurred' });
+        res.status(500).json({ message: error.message || 'Server error' });
     }
 };
 
-// @desc    Register a new user (sends verification email)
-// @route   POST /api/auth/register
-// @access  Public
-export const registerUser = async (req: Request, res: Response) => {
-    try {
-        const { name, email, password } = req.body;
-
-        // Mock DB for demo
-        if (process.env.MONGODB_URI === 'YOUR_MONGO_DB_URL' || !process.env.MONGODB_URI) {
-            return res.status(201).json({
-                _id: 'mock_new_id',
-                name,
-                email,
-                isEmailVerified: false,
-                verificationSent: true,
-                token: generateToken('mock_new_id'),
-            });
-        }
-
-        const userExists = await User.findOne({ email });
-        if (userExists) {
-            res.status(400);
-            throw new Error('User already exists');
-        }
-
-        // Generate email verification token
-        const verificationToken = generateVerificationToken();
-        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-        const isEmailConfigured = process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD;
-        const user = await User.create({
-            name,
-            email,
-            password,
-            isEmailVerified: !isEmailConfigured, // Auto-verify if no email config
-            emailVerificationToken: verificationToken,
-            emailVerificationExpires: verificationExpires,
-        });
-
-        if (user) {
-            // Send verification email
-            await sendVerificationEmail(email, verificationToken);
-
-            res.status(201).json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                isEmailVerified: user.isEmailVerified,
-                verificationSent: !!isEmailConfigured,
-                token: generateToken(user._id),
-            });
-        } else {
-            res.status(400);
-            throw new Error('Invalid user data');
-        }
-    } catch (error: any) {
-        console.error('Registration error:', error);
-        res.status(400).json({ message: error.message || 'Error occurred' });
-    }
-};
-
-// @desc    Verify email with token
-// @route   GET /api/auth/verify-email/:token
-// @access  Public
-export const verifyEmail = async (req: Request, res: Response) => {
-    try {
-        const { token } = req.params;
-
-        // Mock mode
-        if (process.env.MONGODB_URI === 'YOUR_MONGO_DB_URL' || !process.env.MONGODB_URI) {
-            return res.json({ message: 'Email verified successfully', verified: true });
-        }
-
-        const user = await User.findOne({
-            emailVerificationToken: token,
-            emailVerificationExpires: { $gt: new Date() },
-        });
-
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid or expired verification link' });
-        }
-
-        user.isEmailVerified = true;
-        user.emailVerificationToken = undefined;
-        user.emailVerificationExpires = undefined;
-        await user.save();
-
-        res.json({ message: 'Email verified successfully', verified: true });
-    } catch (error: any) {
-        res.status(500).json({ message: error.message || 'Verification failed' });
-    }
-};
-
-// @desc    Resend verification email
-// @route   POST /api/auth/resend-verification
-// @access  Private
-export const resendVerification = async (req: any, res: Response) => {
-    try {
-        if (process.env.MONGODB_URI === 'YOUR_MONGO_DB_URL' || !process.env.MONGODB_URI) {
-            return res.json({ message: 'Verification email sent', sent: true });
-        }
-
-        const user = await User.findById(req.user._id);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        if (user.isEmailVerified) {
-            return res.status(400).json({ message: 'Email already verified' });
-        }
-
-        const token = generateVerificationToken();
-        user.emailVerificationToken = token;
-        user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await user.save();
-
-        await sendVerificationEmail(user.email, token);
-        res.json({ message: 'Verification email sent', sent: true });
-    } catch (error: any) {
-        res.status(500).json({ message: error.message || 'Failed to send email' });
-    }
-};
+// registration-related functions removed
 
 // @desc    Get user profile
 // @route   GET /api/auth/profile

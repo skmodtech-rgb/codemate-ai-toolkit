@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 import { TbApiApp } from "react-icons/tb";
@@ -7,8 +7,8 @@ import { useStore } from '../store/useStore';
 import axios from 'axios';
 
 export default function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('demo@toolmate.ai');
+    const [password, setPassword] = useState('demo123');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -115,13 +115,10 @@ export default function Login() {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between">
                             <label className="flex items-center gap-2 cursor-pointer group">
                                 <input type="checkbox" className="rounded border-border bg-[var(--input-bg)] text-brand-500 focus:ring-brand-500/50 focus:ring-offset-0 w-4 h-4" />
                                 <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Remember me</span>
                             </label>
-                            <a href="#" className="text-sm font-medium text-brand-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Forgot password?</a>
-                        </div>
 
                         <button 
                             disabled={loading}
@@ -144,8 +141,7 @@ export default function Login() {
                     </div>
 
                     <p className="mt-6 text-center text-sm text-muted-foreground">
-                        Don't have an account?{' '}
-                        <Link to="/register" className="font-semibold text-brand-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Create one</Link>
+                        Use demo account to explore all features
                     </p>
                 </div>
             </motion.div>

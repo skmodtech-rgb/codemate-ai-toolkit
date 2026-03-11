@@ -10,7 +10,7 @@ export function useGeminiAPI() {
     const generateContent = useCallback(async (
         prompt: string, 
         fallbackType: FallbackType,
-        modelType: string = 'gemini-1.5-flash-latest'
+        modelType: string = 'gemini-2.0-flash'
     ) => {
         setIsLoading(true);
         setError(null);

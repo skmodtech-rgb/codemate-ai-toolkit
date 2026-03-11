@@ -183,7 +183,7 @@ export default function Home() {
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3">
                                 <Link to="/login" className="text-sm font-semibold text-foreground hover:text-brand-500 transition-colors hidden sm:block">Sign in</Link>
-                                <Link to="/register" className="btn-primary text-xs sm:text-sm px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl">Get Started</Link>
+                                <Link to="/login" className="btn-primary text-xs sm:text-sm px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl">Get Started</Link>
                             </div>
                         </div>
                     </div>
@@ -221,8 +221,8 @@ export default function Home() {
                     </motion.p>
                     
                     <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
-                        <Link to="/register" className="btn-primary h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base rounded-2xl gap-2 group justify-center">
-                            Start Building Free
+                        <Link to="/login" className="btn-primary h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base rounded-2xl gap-2 group justify-center">
+                            Start Exploring Now
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
                         <a href="#features" className="btn-secondary h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base rounded-2xl gap-2 justify-center">
@@ -319,8 +319,8 @@ export default function Home() {
                             Join thousands of users who already use ToolMate AI every day. Free forever.
                         </motion.p>
                         <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-3 justify-center">
-                            <Link to="/register" className="btn-primary h-12 sm:h-14 px-8 sm:px-10 text-sm sm:text-base rounded-2xl gap-2 group justify-center">
-                                Create Free Account <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            <Link to="/login" className="btn-primary h-12 sm:h-14 px-8 sm:px-10 text-sm sm:text-base rounded-2xl gap-2 group justify-center">
+                                Access All Tools <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </Link>
                         </motion.div>
                     </motion.div>
