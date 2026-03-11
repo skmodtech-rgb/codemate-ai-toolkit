@@ -32,7 +32,7 @@ export default function ResumeAnalyzer() {
         `;
 
         try {
-            const response = await generateContent(prompt);
+            const response = await generateContent(prompt, 'resume');
             setResult(response);
         } catch (err) {
             console.error(err);

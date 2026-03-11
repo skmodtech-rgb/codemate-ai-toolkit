@@ -29,7 +29,7 @@ export default function WebsiteSummarizer() {
         `;
 
         try {
-            const response = await generateContent(prompt);
+            const response = await generateContent(prompt, 'website');
             setResult(response);
         } catch (err) {
             console.error(err);

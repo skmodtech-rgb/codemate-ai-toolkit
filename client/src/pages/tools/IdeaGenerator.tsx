@@ -36,7 +36,7 @@ export default function IdeaGenerator() {
         `;
 
         try {
-            const response = await generateContent(prompt);
+            const response = await generateContent(prompt, 'idea');
             setResult(response);
         } catch (err) {
             console.error(err);

@@ -25,7 +25,7 @@ export default function AiStudymate() {
         `;
 
         try {
-            const response = await generateContent(prompt);
+            const response = await generateContent(prompt, 'study');
             setResult(response);
         } catch (err) {
             console.error(err);

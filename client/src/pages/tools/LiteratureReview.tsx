@@ -32,7 +32,7 @@ export default function LiteratureReview() {
         `;
 
         try {
-            const response = await generateContent(prompt);
+            const response = await generateContent(prompt, 'literature');
             setResult(response);
         } catch (err) {
             console.error(err);

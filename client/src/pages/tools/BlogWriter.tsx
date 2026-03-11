@@ -32,7 +32,7 @@ export default function BlogWriter() {
         `;
 
         try {
-            const response = await generateContent(prompt);
+            const response = await generateContent(prompt, 'blog');
             setResult(response);
         } catch (err) {
             console.error(err);

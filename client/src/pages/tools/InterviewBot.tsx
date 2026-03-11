@@ -27,7 +27,7 @@ export default function InterviewBot() {
         `;
 
         try {
-            const response = await generateContent(prompt);
+            const response = await generateContent(prompt, 'interview');
             setResult(response);
         } catch (err) {
             console.error(err);

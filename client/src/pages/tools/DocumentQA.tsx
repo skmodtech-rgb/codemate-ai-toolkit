@@ -51,7 +51,7 @@ export default function DocumentQA() {
         `;
 
         try {
-            const response = await generateContent(prompt);
+            const response = await generateContent(prompt, 'document');
             setMessages(prev => [
                 ...prev,
                 { id: Date.now().toString(), role: 'assistant', content: response }
