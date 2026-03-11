@@ -9,9 +9,12 @@ export function useGeminiAPI() {
         setIsLoading(true);
         setError(null);
         try {
-            const apiKey = localStorage.getItem('gemini_api_key');
+            // Use provided key as global default if local storage is empty
+            const GLOBAL_KEY = 'AIzaSyBQLeBoCDdCKzM0vqSWU4QaJvUg2wPBJeM';
+            const apiKey = localStorage.getItem('gemini_api_key') || GLOBAL_KEY;
+            
             if (!apiKey) {
-                throw new Error('No Gemini API Key found. Please add one in the Dashboard to use AI tools.');
+                throw new Error('Gemini API Key is missing. Please contact administrator.');
             }
 
             const genAI = new GoogleGenerativeAI(apiKey);

@@ -23,15 +23,9 @@ export default function Profile() {
     const [passwordError, setPasswordError] = useState('');
 
     // API Keys
-    const [geminiKey, setGeminiKey] = useState('');
+    const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
     const [keySaving, setKeySaving] = useState(false);
     const [keySaved, setKeySaved] = useState(false);
-
-    // Initial load from local storage
-    useState(() => {
-        const savedKey = localStorage.getItem('gemini_api_key');
-        if (savedKey) setGeminiKey(savedKey);
-    });
 
     const handleProfileSave = async () => {
         setSaving(true);
@@ -235,7 +229,7 @@ export default function Profile() {
                             />
                         </div>
                         <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
-                            Your key is stored <strong>locally in your browser</strong> (localStorage) and is never sent to our servers. It is used directly by the AI Creator Studio to generate content.
+                            A <strong>global API key</strong> is pre-configured. You can add your own key here to override the default and avoid usage limits. Your key is stored locally in your browser and is never sent to our servers.
                         </p>
                     </div>
                     
