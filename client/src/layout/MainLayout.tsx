@@ -30,7 +30,7 @@ const sidebarCategories = [
         ]
     },
     { 
-        title: 'AI Intelligence',
+        title: 'AI Tools',
         items: [
             { name: 'AI StudyMate', icon: FileText, path: '/app/ai-studymate' },
             { name: 'Resume Analyzer', icon: User, path: '/app/resume-analyzer' },

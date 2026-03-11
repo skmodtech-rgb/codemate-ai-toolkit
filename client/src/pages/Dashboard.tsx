@@ -31,11 +31,11 @@ const categories = [
         ]
     },
     {
-        title: "AI Intelligence",
+        title: "AI Tools",
         description: "Problem-Solving AI Tools",
         color: "from-brand-600 to-brand-500",
         icon: Zap,
-        sectionId: "ai-intelligence",
+        sectionId: "ai-tools",
         tools: [
             { name: 'AI StudyMate', path: '/app/ai-studymate', icon: FileText, active: true },
             { name: 'Resume Analyzer', path: '/app/resume-analyzer', icon: User, active: true },
