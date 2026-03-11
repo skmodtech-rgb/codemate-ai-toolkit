@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Camera, Save, Loader2, Check, Lock, Eye, EyeOff, ShieldCheck, Key as KeyIcon } from 'lucide-react';
+import { User, Mail, Camera, Save, Loader2, Check, Lock, Eye, EyeOff, ShieldCheck, Key as KeyIcon, Sparkles } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { useGeminiAPI } from '../../hooks/useGeminiAPI';
 import axios from 'axios';
 
 export default function Profile() {
@@ -26,6 +27,17 @@ export default function Profile() {
     const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
     const [keySaving, setKeySaving] = useState(false);
     const [keySaved, setKeySaved] = useState(false);
+    const { generateContent, isLoading: testLoading } = useGeminiAPI();
+
+    const handleTestConnection = async () => {
+        try {
+            // Using a simple prompt to test connection
+            await generateContent('Hello', 'study');
+            alert('✅ Connection Successful! The Gemini API is responding correctly.');
+        } catch (err: any) {
+            alert('❌ Connection Failed: ' + (err.message || 'Unknown error'));
+        }
+    };
 
     const handleProfileSave = async () => {
         setSaving(true);
@@ -233,13 +245,27 @@ export default function Profile() {
                         </p>
                     </div>
                     
-                    <button 
-                        onClick={handleSaveGeminiKey} 
-                        disabled={keySaving}
-                        className="btn-primary w-full h-11 rounded-2xl text-sm font-semibold gap-2 disabled:opacity-50 mt-2"
-                    >
-                        {keySaving ? <Loader2 className="w-4 h-4 animate-spin" /> : keySaved ? <><Check className="w-4 h-4" /> Saved Locally!</> : <><Save className="w-4 h-4" /> Save API Key</>}
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-3 mt-2">
+                        <button 
+                            onClick={handleSaveGeminiKey} 
+                            disabled={keySaving}
+                            className="flex-1 btn-primary h-11 rounded-2xl text-sm font-semibold gap-2 disabled:opacity-50"
+                        >
+                            {keySaving ? <Loader2 className="w-4 h-4 animate-spin" /> : keySaved ? <><Check className="w-4 h-4" /> Saved!</> : <><Save className="w-4 h-4" /> Save API Key</>}
+                        </button>
+                        <button 
+                            onClick={handleTestConnection}
+                            disabled={testLoading}
+                            className="flex-1 h-11 rounded-2xl bg-brand-500/10 text-brand-500 text-sm font-semibold hover:bg-brand-500/20 transition-colors border border-brand-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                            {testLoading ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Sparkles className="w-4 h-4" />
+                            )}
+                            Test Connection
+                        </button>
+                    </div>
                 </div>
             </div>
         </motion.div>
