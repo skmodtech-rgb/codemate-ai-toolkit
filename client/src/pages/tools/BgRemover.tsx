@@ -31,9 +31,11 @@ export default function BgRemover() {
         setError(null);
         
         try {
-            // Proxy request through our own backend to avoid CORS issues from N8N cloud
-            const res = await axios.post('http://localhost:5000/api/tools/remove-bg', {
-                image: file.data,
+            // Use source_image_base64 as expected by the N8N webhook
+            const base64Data = file.data.includes(',') ? file.data.split(',')[1] : file.data;
+            
+            const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tools/remove-bg`, {
+                source_image_base64: base64Data,
                 fileName: file.name
             }, {
                 headers: {
