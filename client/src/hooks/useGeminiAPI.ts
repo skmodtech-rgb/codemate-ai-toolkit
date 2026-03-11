@@ -18,7 +18,7 @@ export function useGeminiAPI() {
             }
 
             const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: modelType });
+            const model = genAI.getGenerativeModel({ model: modelType }, { apiVersion: 'v1' });
             
             const result = await model.generateContent(prompt);
             const response = await result.response;
