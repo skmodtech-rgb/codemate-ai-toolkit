@@ -62,8 +62,15 @@ export default function BgRemover() {
                     if (typeof obj === 'string') {
                         if (obj.startsWith('http') || obj.startsWith('data:image')) return obj;
                         // Check if it's a raw base64 string
-                        if (obj.length > 500 && /^[A-Za-z0-9+/=]+$/.test(obj.trim().substring(0, 100))) {
-                            return `data:image/png;base64,${obj.trim()}`;
+                        const trimmed = obj.trim();
+                        if (trimmed.length > 500 && /^[A-Za-z0-9+/=]+$/.test(trimmed.substring(0, 100))) {
+                            // Detect image type from base64 header
+                            let type = 'png';
+                            if (trimmed.startsWith('UklGR')) type = 'webp';
+                            else if (trimmed.startsWith('/9j/')) type = 'jpeg';
+                            else if (trimmed.startsWith('iVBORw')) type = 'png';
+                            
+                            return `data:image/${type};base64,${trimmed}`;
                         }
                         return null;
                     }
@@ -113,7 +120,12 @@ export default function BgRemover() {
             } else if (text.startsWith('http') || text.startsWith('data:image')) {
                 setResultUrl(text.trim());
             } else if (text.length > 500 && /^[A-Za-z0-9+/=]+$/.test(text.trim().substring(0, 100))) {
-                setResultUrl(`data:image/png;base64,${text.trim()}`);
+                const trimmed = text.trim();
+                let type = 'png';
+                if (trimmed.startsWith('UklGR')) type = 'webp';
+                else if (trimmed.startsWith('/9j/')) type = 'jpeg';
+                else if (trimmed.startsWith('iVBORw')) type = 'png';
+                setResultUrl(`data:image/${type};base64,${trimmed}`);
             } else {
                 const blob = new Blob([res.data], { type: 'image/png' });
                 const objectUrl = URL.createObjectURL(blob);
@@ -222,17 +234,32 @@ export default function BgRemover() {
                                 <p className="text-sm font-medium text-cyan-400 animate-pulse">AI is detecting subject...</p>
                             </div>
                         ) : resultUrl ? (
-                            <div className="w-full flex-col flex items-center gap-4">
-                                <div className="relative rounded-xl overflow-hidden shadow-2xl">
-                                    <div className="absolute inset-0 z-0 bg-white" style={{backgroundImage: 'repeating-linear-gradient(45deg, #e5e7eb 25%, transparent 25%, transparent 75%, #e5e7eb 75%, #e5e7eb), repeating-linear-gradient(45deg, #e5e7eb 25%, #ffffff 25%, #ffffff 75%, #e5e7eb 75%, #e5e7eb)', backgroundPosition: '0 0, 10px 10px', backgroundSize: '20px 20px'}}></div>
-                                    <img src={resultUrl} alt="Background removed" className="max-w-full max-h-[400px] relative z-10 object-contain" />
+                            <div className="w-full h-full flex flex-col items-center justify-between gap-4 py-2">
+                                <div className="flex-1 relative rounded-xl overflow-hidden shadow-2xl flex items-center justify-center w-full min-h-[300px] bg-accent/20">
+                                    <div className="absolute inset-0 z-0 bg-white" style={{backgroundImage: 'repeating-linear-gradient(45deg, #e5e7eb 25%, transparent 25%, transparent 75%, #e5e7eb 75%, #e5e7eb), repeating-linear-gradient(45deg, #e5e7eb 25%, #ffffff 25%, #ffffff 75%, #e5e7eb 75%, #e5e7eb)', backgroundPosition: '0 0, 10px 10px', backgroundSize: '15px 15px'}}></div>
+                                    <img 
+                                        src={resultUrl} 
+                                        alt="Background removed" 
+                                        className="max-w-full max-h-[450px] relative z-20 object-contain drop-shadow-2xl"
+                                        onError={(e) => {
+                                            console.error("Image load error", e);
+                                        }}
+                                    />
                                 </div>
-                                <button 
-                                    onClick={handleDownload}
-                                    className="btn-primary w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-500"
-                                >
-                                    <Download className="w-4 h-4" /> Download HD Image
-                                </button>
+                                <div className="w-full flex gap-3 mt-auto relative z-30">
+                                    <button 
+                                        onClick={() => setResultUrl(null)}
+                                        className="btn-secondary flex-1 h-12"
+                                    >
+                                        Clear
+                                    </button>
+                                    <button 
+                                        onClick={handleDownload}
+                                        className="btn-primary flex-[2] h-12 bg-gradient-to-r from-emerald-600 to-emerald-500 shadow-emerald-500/20"
+                                    >
+                                        <Download className="w-4 h-4" /> Download HD Image
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center text-foreground/40 text-center">
