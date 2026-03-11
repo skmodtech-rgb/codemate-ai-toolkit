@@ -202,26 +202,50 @@ export const n8nProxy = async (req: Request, res: Response) => {
 
 // --- Gemini Brain for Problem Solving Tools ---
 export const geminiBrain = async (req: Request, res: Response) => {
-    try {
-        const { prompt } = req.body;
-        
-        const apiKey = process.env.GEMINI_API_KEY;
-        const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+    const { prompt } = req.body;
+    const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+    const keys = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '').split(',').filter(k => k.trim());
 
-        if (!apiKey) {
-            throw new Error('Gemini API key is not configured on the server.');
-        }
-
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: modelName });
-
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-
-        res.json({ success: true, response: text });
-    } catch (error: any) {
-        console.error('Gemini Brain Error:', error.message);
-        res.status(500).json({ success: false, message: error.message || 'AI Generation failed' });
+    if (keys.length === 0) {
+        return res.status(500).json({ success: false, message: 'Gemini API keys are not configured on the server.' });
     }
+
+    let lastError: any = null;
+
+    // Try each key until one works
+    for (let i = 0; i < keys.length; i++) {
+        const apiKey = keys[i].trim();
+        try {
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: modelName });
+
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+
+            console.log(`Gemini Success using key ${i + 1}/${keys.length}`);
+            return res.json({ success: true, response: text });
+            
+        } catch (error: any) {
+            lastError = error;
+            const errorMsg = error.message || '';
+            
+            // Check if it's a 429 or quota error
+            if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('Too Many Requests')) {
+                console.warn(`Gemini Key ${i + 1} exhausted (429/Quota). Trying next key...`);
+                continue; // Try the next key
+            } else {
+                // If it's a different kind of error (e.g. invalid prompt), don't bother rotating
+                console.error(`Gemini Error on key ${i + 1}:`, errorMsg);
+                break; 
+            }
+        }
+    }
+
+    // If we get here, all keys failed or error was not rotatable
+    const finalMessage = lastError?.message || 'AI Generation failed after trying all keys';
+    res.status(500).json({ 
+        success: false, 
+        message: finalMessage.includes('429') ? 'AI service is temporarily overloaded. Please try again in 1 minute.' : finalMessage 
+    });
 };
